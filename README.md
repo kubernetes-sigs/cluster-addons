@@ -10,6 +10,7 @@ You can reach the maintainers of this project at:
 
 - [Slack channel](https://kubernetes.slack.com/messages/cluster-addons)
 - [Mailing list](https://groups.google.com/forum/#!forum/kubernetes-sig-cluster-lifecycle)
+- [Meeting agenda](https://docs.google.com/document/d/10_tl_SXcFGb-2109QpcFVrdrfnVEuQ05MBrXtasB0vk/edit#)
 
 ### Code of conduct
 
