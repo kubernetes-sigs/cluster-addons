@@ -1,6 +1,6 @@
 # Addon Operators
 
-Repo for https://github.com/kubernetes/enhancements/pull/746
+Repo for [cluster addon operators](https://github.com/kubernetes/enhancements/blob/master/keps/sig-cluster-lifecycle/addons/0035-20190128-addons-via-operators.md).
 
 ## Community, discussion, contribution, and support
 
