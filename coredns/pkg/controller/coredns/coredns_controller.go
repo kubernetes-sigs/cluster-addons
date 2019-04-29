@@ -43,7 +43,26 @@ func newReconciler(mgr manager.Manager) *ReconcileCoreDNS {
 
 	r := &ReconcileCoreDNS{}
 
+	replacePlaceholders := func(ctx context.Context, object declarative.DeclarativeObject, s string) (string, error) {
+		// TODO: Should we default and if so where?
+		dnsDomain := "" // o.Spec.DNSDomain
+		if dnsDomain == "" {
+			dnsDomain = "cluster.local"
+		}
+
+		dnsServerIP := "" // o.Spec.DNSServerIP
+		if dnsServerIP == "" {
+			dnsServerIP = "10.0.0.10"
+		}
+
+		s = strings.Replace(s, "__PILLAR__DNS__DOMAIN__", dnsDomain, -1)
+		s = strings.Replace(s, "__PILLAR__DNS__SERVER__", dnsServerIP, -1)
+
+		return s, nil
+	}
+
 	r.Reconciler.Init(mgr, &api.CoreDNS{},
+		declarative.WithRawManifestOperation(replacePlaceholders),
 		declarative.WithObjectTransform(declarative.AddLabels(labels)),
 		declarative.WithOwner(declarative.SourceAsOwner),
 		declarative.WithLabels(declarative.SourceLabel(mgr.GetScheme())),
