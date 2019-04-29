@@ -17,9 +17,14 @@ package coredns
 
 import (
 	"context"
+	"fmt"
+	"net"
 	"strings"
 
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/klog"
 	api "sigs.k8s.io/addon-operators/coredns/pkg/apis/addons/v1alpha1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -52,7 +57,11 @@ func newReconciler(mgr manager.Manager) *ReconcileCoreDNS {
 
 		dnsServerIP := "" // o.Spec.DNSServerIP
 		if dnsServerIP == "" {
-			dnsServerIP = "10.0.0.10"
+			ip, err := findDNSClusterIP(ctx, mgr.GetClient())
+			if err != nil {
+				return "", fmt.Errorf("unable to find kube-dns IP: %v", err)
+			}
+			dnsServerIP = ip
 		}
 
 		s = strings.Replace(s, "__PILLAR__DNS__DOMAIN__", dnsDomain, -1)
@@ -103,4 +112,29 @@ var _ reconcile.Reconciler = &ReconcileCoreDNS{}
 // ReconcileCoreDNS reconciles a CoreDNS object
 type ReconcileCoreDNS struct {
 	declarative.Reconciler
+}
+
+func findDNSClusterIP(ctx context.Context, c client.Client) (string, error) {
+	kubernetesService := &corev1.Service{}
+	id := client.ObjectKey{Namespace: "default", Name: "kubernetes"}
+	if err := c.Get(ctx, id, kubernetesService); err != nil {
+		return "", fmt.Errorf("error getting service %s: %v", id, err)
+	}
+
+	clusterIP := kubernetesService.Spec.ClusterIP
+
+	// Assume it is .1, and we want .10
+	ip := net.ParseIP(clusterIP)
+	if ip == nil {
+		return "", fmt.Errorf("cannot parse kubernetes ClusterIP %q", clusterIP)
+	}
+	ipv4 := ip.To4()
+	if ipv4 == nil {
+		return "", fmt.Errorf("expected IPv4 kubernetes ClusterIP %q", clusterIP)
+	}
+	ipv4[3] = 10
+
+	klog.Infof("determined ClusterIP for kube-dns should be %q", ipv4)
+
+	return ipv4.String(), nil
 }
