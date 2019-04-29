@@ -82,7 +82,7 @@ require (
 	gopkg.in/square/go-jose.v2 v2.0.0-20180411045311-89060dee6a84 // indirect
 	gopkg.in/yaml.v1 v1.0.0-20140924161607-9f9df34309c0 // indirect
 	gotest.tools v2.2.0+incompatible // indirect
-	k8s.io/api v0.0.0-20190222213804-5cb15d344471
+	k8s.io/api v0.0.0-20190222213804-5cb15d344471 // indirect
 	k8s.io/apiextensions-apiserver v0.0.0-20190325193600-475668423e9f // indirect
 	k8s.io/apimachinery v0.0.0-20190221213512-86fb29eff628
 	k8s.io/apiserver v0.0.0-20190319190228-a4358799e4fe // indirect
@@ -92,6 +92,7 @@ require (
 	k8s.io/utils v0.0.0-20190308190857-21c4ce38f2a7 // indirect
 	sigs.k8s.io/controller-runtime v0.1.10
 	sigs.k8s.io/controller-tools v0.1.10
+	sigs.k8s.io/kubebuilder-declarative-pattern v0.0.0-20190404154250-8bafc34fd655
 	sigs.k8s.io/structured-merge-diff v0.0.0-20190302045857-e85c7b244fd2 // indirect
 	sigs.k8s.io/testing_frameworks v0.1.1 // indirect
 	sigs.k8s.io/yaml v1.1.0 // indirect

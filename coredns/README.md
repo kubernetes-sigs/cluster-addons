@@ -40,4 +40,31 @@ Commit
 ```bash
 git add .
 git reset HEAD vendor
+git commit -m "Initial CoreDNS scaffolding"
 ```
+
+
+
+Create the manifests (we bake them into the addon-operator by default):
+
+```bash
+mkdir -p channels/packages/coredns/1.3.1/
+pushd channels/packages/coredns/1.3.1/
+wget https://raw.githubusercontent.com/kubernetes/kubernetes/9b437f95207c04bf2f25ef3110fac9b356d1fa91/cluster/addons/dns/coredns/coredns.yaml.base
+cat coredns.yaml.base > manifest.yaml
+popd
+```
+
+Define the stable channel:
+
+```bash
+
+cat > channels/stable <<EOF
+manifests:
+- version: 1.3.1
+EOF
+
+```
+
+
+Follow the instructions here to [enable the declarative pattern library in your types](https://github.com/kubernetes-sigs/kubebuilder-declarative-pattern/tree/master/docs/addon/walkthrough#adding-the-framework-into-our-types) and to [enable to declarative pattern in your controller](https://github.com/kubernetes-sigs/kubebuilder-declarative-pattern/tree/master/docs/addon/walkthrough#using-the-framework-in-the-controller), finally add the [call to addon.Init](https://github.com/kubernetes-sigs/kubebuilder-declarative-pattern/tree/master/docs/addon/walkthrough#misc); note that we intend to build this into kubebuilder

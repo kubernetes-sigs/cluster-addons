@@ -17,21 +17,35 @@ package v1alpha1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	addonv1alpha1 "sigs.k8s.io/kubebuilder-declarative-pattern/pkg/patterns/addon/pkg/apis/v1alpha1"
 )
-
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
 // CoreDNSSpec defines the desired state of CoreDNS
 type CoreDNSSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	addonv1alpha1.CommonSpec
 }
 
 // CoreDNSStatus defines the observed state of CoreDNS
 type CoreDNSStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	addonv1alpha1.CommonStatus
+}
+
+var _ addonv1alpha1.CommonObject = &CoreDNS{}
+
+func (c *CoreDNS) ComponentName() string {
+	return "coredns"
+}
+
+func (c *CoreDNS) CommonSpec() addonv1alpha1.CommonSpec {
+	return c.Spec.CommonSpec
+}
+
+func (c *CoreDNS) GetCommonStatus() addonv1alpha1.CommonStatus {
+	return c.Status.CommonStatus
+}
+
+func (c *CoreDNS) SetCommonStatus(s addonv1alpha1.CommonStatus) {
+	c.Status.CommonStatus = s
 }
 
 // +genclient
