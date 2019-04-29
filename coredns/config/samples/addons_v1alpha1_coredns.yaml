@@ -1,9 +1,7 @@
 apiVersion: addons.k8s.io/v1alpha1
 kind: CoreDNS
 metadata:
-  labels:
-    controller-tools.k8s.io: "1.0"
-  name: coredns-sample
+  name: default
+  namespace: kube-system
 spec:
-  # Add fields here
-  foo: bar
+  channel: stable

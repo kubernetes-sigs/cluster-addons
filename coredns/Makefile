@@ -1,6 +1,6 @@
 
 # Image URL to use all building/pushing image targets
-IMG ?= controller:latest
+IMG ?= ${USER}/coredns-operator:latest
 
 all: test manager
 
@@ -23,7 +23,7 @@ install: manifests
 # Deploy controller in the configured Kubernetes cluster in ~/.kube/config
 deploy: manifests
 	kubectl apply -f config/crds
-	kustomize build config/default | kubectl apply -f -
+	cat k8s/manager.yaml | sed -e "s@IMAGE_NAME@${IMG}@g" | kubectl apply -f -
 
 # Generate manifests e.g. CRD, RBAC etc.
 manifests:
@@ -53,3 +53,14 @@ docker-build: test
 # Push the docker image
 docker-push:
 	docker push ${IMG}
+
+push-image:
+	mkdir -p .build
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o .build/manager ./cmd/manager
+	mkdir -p .build/bin
+	cd .build/bin; wget -N https://storage.googleapis.com/kubernetes-release/release/v1.14.0/bin/linux/amd64/kubectl
+	chmod +x .build/bin/kubectl
+	tar cvf .build/layer.tar -C .build manager bin/kubectl
+	tar rvf .build/layer.tar channels/
+	crane append --base gcr.io/distroless/static:latest --new_layer .build/layer.tar --new_tag ${IMG} --output .build/merged.tar
+	crane push .build/merged.tar ${IMG}

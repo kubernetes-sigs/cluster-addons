@@ -76,7 +76,6 @@ func newReconciler(mgr manager.Manager) *ReconcileCoreDNS {
 		declarative.WithOwner(declarative.SourceAsOwner),
 		declarative.WithLabels(declarative.SourceLabel(mgr.GetScheme())),
 		declarative.WithStatus(status.NewBasic(mgr.GetClient())),
-		declarative.WithApplyPrune(),
 	)
 
 	return r
@@ -108,7 +107,11 @@ var _ reconcile.Reconciler = &ReconcileCoreDNS{}
 
 // +kubebuilder:rbac:groups=addons.k8s.io,resources=coredns,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=addons.k8s.io,resources=coredns/status,verbs=get;update;patch
-
+// +kubebuilder:rbac:groups=apps;extensions,resources=deployments,verbs=get;list;watch;create;update;delete;patch
+// +kubebuilder:rbac:groups="",resources=configmaps;serviceaccounts;services,verbs=get;list;watch;create;update;delete;patch
+// +kubebuilder:rbac:groups=rbac.authorization.k8s.io,resources=roles;rolebindings;clusterroles;clusterrolebindings,verbs=get;list;watch;create;update;delete;patch
+// To grant permissions to CoreDNS, we need those permissions:
+// +kubebuilder:rbac:groups="",resources=endpoints;namespaces;nodes;pods,verbs=get;list;watch
 // ReconcileCoreDNS reconciles a CoreDNS object
 type ReconcileCoreDNS struct {
 	declarative.Reconciler
