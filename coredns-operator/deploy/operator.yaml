@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: coredns-operator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: coredns-operator
+  template:
+    metadata:
+      labels:
+        name: coredns-operator
+    spec:
+      serviceAccountName: coredns-operator
+      containers:
+        - name: coredns-operator
+          # Replace this with the built image name
+          image: REPLACE_IMAGE
+          command:
+          - coredns-operator
+          imagePullPolicy: Always
+          env:
+            - name: WATCH_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: OPERATOR_NAME
+              value: "coredns-operator"
