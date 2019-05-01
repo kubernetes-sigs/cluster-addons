@@ -1,0 +1,7 @@
+apiVersion: addons.k8s.io/v1alpha1
+kind: CoreDNS
+metadata:
+  name: example-coredns
+spec:
+  # Add fields here
+  size: 3
