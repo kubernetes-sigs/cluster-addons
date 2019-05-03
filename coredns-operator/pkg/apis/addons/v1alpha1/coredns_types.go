@@ -15,6 +15,13 @@ type CoreDNSSpec struct {
 	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
 	// Add custom validation using kubebuilder tags: https://book.kubebuilder.io/beyond_basics/generating_crd.html
 	addonv1alpha1.CommonSpec
+
+	// Corefile is a string representation of the operated CoreDNS's ConfigMap.
+	// This string is hashed so that it's possible to do RollingUpdates of CoreDNS.
+	Corefile string `json:"corefile,omitempty"`
+	// ClusterDNS determines whether the operated CoreDNS reserves the 10th address of the cluster's service subnet.
+	// Enabling this option makes the resulting CoreDNS service the canonical DNS server of the cluster.
+	ClusterDNS bool `json:"clusterDNS,omitempty"`
 }
 
 // CoreDNSStatus defines the observed state of CoreDNS
