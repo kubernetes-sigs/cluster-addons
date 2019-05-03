@@ -2,14 +2,19 @@ package coredns
 
 import (
 	"context"
+	"fmt"
+	"net"
 
+	"github.com/go-logr/logr"
 	addonsv1alpha1 "sigs.k8s.io/addon-operators/coredns-operator/pkg/apis/addons/v1alpha1"
 
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
+	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -47,19 +52,34 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to primary resource CoreDNS
-	err = c.Watch(&source.Kind{Type: &addonsv1alpha1.CoreDNS{}}, &handler.EnqueueRequestForObject{})
+	err = c.Watch(
+		&source.Kind{Type: &addonsv1alpha1.CoreDNS{}},
+		&handler.EnqueueRequestForObject{},
+	)
 	if err != nil {
 		return err
 	}
 
-	// TODO(user): Modify this to be the types you create that are owned by the primary resource
-	// Watch for changes to secondary resource Pods and requeue the owner CoreDNS
-	err = c.Watch(&source.Kind{Type: &corev1.Pod{}}, &handler.EnqueueRequestForOwner{
-		IsController: true,
-		OwnerType:    &addonsv1alpha1.CoreDNS{},
-	})
-	if err != nil {
-		return err
+	// Watch for secondary types
+	watchTypes := []runtime.Object{
+		&appsv1.Deployment{},
+		&corev1.Service{},
+		&corev1.ConfigMap{},
+		&corev1.ServiceAccount{},
+		&rbacv1.ClusterRole{},
+		&rbacv1.ClusterRoleBinding{},
+	}
+	for _, obj := range watchTypes {
+		err = c.Watch(
+			&source.Kind{Type: obj},
+			&handler.EnqueueRequestForOwner{
+				IsController: true,
+				OwnerType:    &addonsv1alpha1.CoreDNS{},
+			},
+		)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -100,54 +120,160 @@ func (r *ReconcileCoreDNS) Reconcile(request reconcile.Request) (reconcile.Resul
 		return reconcile.Result{}, err
 	}
 
-	// Define a new Pod object
-	pod := newPodForCR(instance)
-
-	// Set CoreDNS instance as the owner and controller
-	if err := controllerutil.SetControllerReference(instance, pod, r.scheme); err != nil {
-		return reconcile.Result{}, err
-	}
-
-	// Check if this Pod already exists
-	found := &corev1.Pod{}
-	err = r.client.Get(context.TODO(), types.NamespacedName{Name: pod.Name, Namespace: pod.Namespace}, found)
-	if err != nil && errors.IsNotFound(err) {
-		reqLogger.Info("Creating a new Pod", "Pod.Namespace", pod.Namespace, "Pod.Name", pod.Name)
-		err = r.client.Create(context.TODO(), pod)
+	if instance.Spec.Corefile == "" {
+		instance.Spec.Corefile = DefaultCorefile
+		reqLogger.Info("Updating CoreDNS with default Corefile")
+		err = r.client.Update(context.TODO(), instance)
 		if err != nil {
 			return reconcile.Result{}, err
 		}
+	}
 
-		// Pod created successfully - don't requeue
-		return reconcile.Result{}, nil
-	} else if err != nil {
+	foundDeployment := &appsv1.Deployment{}
+	err = r.createOrFetch(reqLogger, instance, newDeploymentForCR(instance), foundDeployment)
+	if err != nil && !errors.IsNotFound(err) {
 		return reconcile.Result{}, err
 	}
 
-	// Pod already exists - don't requeue
-	reqLogger.Info("Skip reconcile: Pod already exists", "Pod.Namespace", found.Namespace, "Pod.Name", found.Name)
+	service := newServiceForCR(instance)
+	dnsIP, err := r.calculateDNSClusterIP()
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+	if instance.Spec.ClusterDNS {
+		service.Spec.ClusterIP = dnsIP
+	}
+	foundService := &corev1.Service{}
+	err = r.createOrFetch(reqLogger, instance, service, foundService)
+	if err != nil && !errors.IsNotFound(err) {
+		return reconcile.Result{}, err
+	} else if err == nil {
+		// The object was found already existing in the cluster
+		// Check that the Service's ClusterIP is correct -- if not, update it
+		if instance.Spec.ClusterDNS {
+			if foundService.Spec.ClusterIP != dnsIP {
+				reqLogger.Info("Re-creating Service", foundService.Namespace, "/", foundService.Name, "with operator-managed ClusterIP:", dnsIP)
+				// ClusterIP field is immutable -- delete it, next reconcile will re-create
+				err = r.client.Delete(context.TODO(), foundService)
+				if err != nil {
+					return reconcile.Result{}, err
+				}
+			}
+		} else {
+			if foundService.Spec.ClusterIP == dnsIP {
+				reqLogger.Info("Re-creating Service", foundService.Namespace, "/", foundService.Name, "-- removing operator-managed ClusterIP:", dnsIP)
+				// ClusterIP field is immutable -- delete it, next reconcile will re-create
+				err = r.client.Delete(context.TODO(), foundService)
+				if err != nil {
+					return reconcile.Result{}, err
+				}
+			}
+		}
+	}
+
+	foundConfigMap := &corev1.ConfigMap{}
+	err = r.createOrFetch(reqLogger, instance, newConfigMapForCR(instance), foundConfigMap)
+	if err != nil && !errors.IsNotFound(err) {
+		return reconcile.Result{}, err
+	} else if err == nil {
+		// The object was found already existing in the cluster
+		// Check that the ConfigMap's Corefile is correct -- if not, update it
+		foundCorefile, inData := foundConfigMap.Data["Corefile"]
+		if !inData || foundCorefile != instance.Spec.Corefile {
+			foundConfigMap.Data["Corefile"] = instance.Spec.Corefile
+			reqLogger.Info("Updating ConfigMap", foundConfigMap.Namespace, "/", foundConfigMap.Name, "with new Corefile")
+			err = r.client.Update(context.TODO(), foundConfigMap)
+			if err != nil {
+				return reconcile.Result{}, err
+			}
+		}
+	}
+
+	foundServiceAccount := &corev1.ServiceAccount{}
+	err = r.createOrFetch(reqLogger, instance, newServiceAccountForCR(instance), foundServiceAccount)
+	if err != nil && !errors.IsNotFound(err) {
+		return reconcile.Result{}, err
+	}
+
+	foundClusterRole := &rbacv1.ClusterRole{}
+	err = r.createOrFetch(reqLogger, instance, newClusterRoleForCR(instance), foundClusterRole)
+	if err != nil && !errors.IsNotFound(err) {
+		return reconcile.Result{}, err
+	}
+
+	foundClusterRoleBinding := &rbacv1.ClusterRoleBinding{}
+	err = r.createOrFetch(reqLogger, instance, newClusterRoleBindingForCR(instance), foundClusterRoleBinding)
+	if err != nil && !errors.IsNotFound(err) {
+		return reconcile.Result{}, err
+	}
+
+	// Reconcile is successful
 	return reconcile.Result{}, nil
 }
 
-// newPodForCR returns a busybox pod with the same name/namespace as the cr
-func newPodForCR(cr *addonsv1alpha1.CoreDNS) *corev1.Pod {
-	labels := map[string]string{
-		"app": cr.Name,
+func (r *ReconcileCoreDNS) calculateDNSClusterIP() (string, error) {
+	kubernetesService := &corev1.Service{}
+	id := client.ObjectKey{Namespace: "default", Name: "kubernetes"}
+	if err := r.client.Get(context.TODO(), id, kubernetesService); err != nil {
+		return "", fmt.Errorf("error getting service %s: %v", id, err)
 	}
-	return &corev1.Pod{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      cr.Name + "-pod",
-			Namespace: cr.Namespace,
-			Labels:    labels,
-		},
-		Spec: corev1.PodSpec{
-			Containers: []corev1.Container{
-				{
-					Name:    "busybox",
-					Image:   "busybox",
-					Command: []string{"sleep", "3600"},
-				},
-			},
-		},
+
+	ip := net.ParseIP(kubernetesService.Spec.ClusterIP)
+	if ip == nil {
+		return "", fmt.Errorf("cannot parse kubernetes ClusterIP %q", kubernetesService.Spec.ClusterIP)
 	}
+
+	// The kubernetes Service ClusterIP is the 1st IP in the Service Subnet.
+	// Increment the right-most byte by 9 to get to the 10th address, canonically used for kube-dns.
+	// This works for both IPV4, IPV6, and 16-byte IPV4 addresses.
+	ip[len(ip)-1] += 9
+
+	return ip.String(), nil
+}
+
+// createOrFetch creates an object or populates found with the matching object from the cluster.
+// It returns a notFound error if the object is created.
+func (r *ReconcileCoreDNS) createOrFetch(reqLogger logr.Logger, instance metav1.Object, obj, found runtime.Object) error {
+	meta, ok := obj.(metav1.Object)
+	if !ok {
+		return fmt.Errorf("Meta conversion failed for obj: %+v", obj)
+	}
+
+	// Set CoreDNS instance as the object owner and controller
+	if err := controllerutil.SetControllerReference(instance, meta, r.scheme); err != nil {
+		return err
+	}
+
+	// Check if this Object already exists
+	key, err := client.ObjectKeyFromObject(obj)
+	if err != nil {
+		return err
+	}
+	err = r.client.Get(
+		context.TODO(),
+		key,
+		found,
+	)
+	if err != nil && errors.IsNotFound(err) {
+		reqLogger.Info("Creating a new obj", "obj.Kind", obj.GetObjectKind().GroupVersionKind(), "obj.Namespace", meta.GetNamespace(), "obj.Name", meta.GetName())
+		createErr := r.client.Create(context.TODO(), obj)
+		if createErr != nil {
+			return err
+		}
+		return err
+	} else if err != nil {
+		return err
+	} else {
+		// obj already exists - just log
+		foundGVK := found.GetObjectKind().GroupVersionKind()
+		foundMeta, ok := found.(metav1.Object)
+		if !ok {
+			return fmt.Errorf("Meta conversion failed for found: %+v", found)
+		}
+		reqLogger.Info("Skip reconcile: obj already exists", "obj.Kind", foundGVK, "obj.Namespace", foundMeta.GetNamespace(), "obj.Name", foundMeta.GetName())
+
+		fmt.Println("\n", found.GetObjectKind().GroupVersionKind().Kind)
+	}
+
+	return nil
 }
