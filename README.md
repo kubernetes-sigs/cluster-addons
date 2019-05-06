@@ -32,11 +32,8 @@ Cluster addons is a community project. If you're interested in building this, pl
 
 Learn how to engage with the Kubernetes community on the [community page](http://kubernetes.io/community/).
 
-You can reach the maintainers of this project at:
-
-- [Slack channel](https://kubernetes.slack.com/messages/cluster-addons)
-- [Mailing list](https://groups.google.com/forum/#!forum/kubernetes-sig-cluster-lifecycle)
-- [Meeting agenda](https://docs.google.com/document/d/10_tl_SXcFGb-2109QpcFVrdrfnVEuQ05MBrXtasB0vk/edit#)
+Check out up to date information about where discussions and meetings happen on
+the [community page of SIG Cluster Lifecycle](https://github.com/kubernetes/community/tree/master/sig-cluster-lifecycle).
 
 ### Code of conduct
 
