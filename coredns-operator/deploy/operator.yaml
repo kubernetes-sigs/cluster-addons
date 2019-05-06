@@ -19,7 +19,7 @@ spec:
           image: REPLACE_IMAGE
           command:
           - coredns-operator
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           env:
             - name: WATCH_NAMESPACE
               valueFrom:
