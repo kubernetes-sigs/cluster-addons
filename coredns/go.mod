@@ -93,7 +93,7 @@ require (
 	k8s.io/utils v0.0.0-20190308190857-21c4ce38f2a7 // indirect
 	sigs.k8s.io/controller-runtime v0.1.10
 	sigs.k8s.io/controller-tools v0.1.10
-	sigs.k8s.io/kubebuilder-declarative-pattern v0.0.0-20190404154250-8bafc34fd655
+	sigs.k8s.io/kubebuilder-declarative-pattern v0.0.0-20190624171758-3bfb5869c8b7
 	sigs.k8s.io/structured-merge-diff v0.0.0-20190302045857-e85c7b244fd2 // indirect
 	sigs.k8s.io/testing_frameworks v0.1.1 // indirect
 	sigs.k8s.io/yaml v1.1.0 // indirect

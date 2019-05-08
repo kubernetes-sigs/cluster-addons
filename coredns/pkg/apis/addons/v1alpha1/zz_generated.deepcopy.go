@@ -27,7 +27,7 @@ func (in *CoreDNS) DeepCopyInto(out *CoreDNS) {
 	*out = *in
 	out.TypeMeta = in.TypeMeta
 	in.ObjectMeta.DeepCopyInto(&out.ObjectMeta)
-	out.Spec = in.Spec
+	in.Spec.DeepCopyInto(&out.Spec)
 	in.Status.DeepCopyInto(&out.Status)
 	return
 }
@@ -87,6 +87,7 @@ func (in *CoreDNSList) DeepCopyObject() runtime.Object {
 func (in *CoreDNSSpec) DeepCopyInto(out *CoreDNSSpec) {
 	*out = *in
 	out.CommonSpec = in.CommonSpec
+	in.PatchSpec.DeepCopyInto(&out.PatchSpec)
 	return
 }
 

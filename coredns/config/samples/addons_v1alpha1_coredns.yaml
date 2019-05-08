@@ -5,3 +5,11 @@ metadata:
   namespace: kube-system
 spec:
   channel: stable
+  patches:
+  - apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: coredns
+      namespace: kube-system
+      labels:
+        foo: bar
