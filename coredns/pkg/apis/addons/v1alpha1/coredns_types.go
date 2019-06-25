@@ -22,15 +22,17 @@ import (
 
 // CoreDNSSpec defines the desired state of CoreDNS
 type CoreDNSSpec struct {
-	addonv1alpha1.CommonSpec
+	addonv1alpha1.CommonSpec `json:",inline"`
+	addonv1alpha1.PatchSpec  `json:",inline"`
 }
 
 // CoreDNSStatus defines the observed state of CoreDNS
 type CoreDNSStatus struct {
-	addonv1alpha1.CommonStatus
+	addonv1alpha1.CommonStatus `json:",inline"`
 }
 
 var _ addonv1alpha1.CommonObject = &CoreDNS{}
+var _ addonv1alpha1.Patchable = &CoreDNS{}
 
 func (c *CoreDNS) ComponentName() string {
 	return "coredns"
@@ -46,6 +48,10 @@ func (c *CoreDNS) GetCommonStatus() addonv1alpha1.CommonStatus {
 
 func (c *CoreDNS) SetCommonStatus(s addonv1alpha1.CommonStatus) {
 	c.Status.CommonStatus = s
+}
+
+func (c *CoreDNS) PatchSpec() addonv1alpha1.PatchSpec {
+	return c.Spec.PatchSpec
 }
 
 // +genclient

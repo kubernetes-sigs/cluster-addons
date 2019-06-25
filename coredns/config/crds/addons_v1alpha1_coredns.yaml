@@ -27,8 +27,30 @@ spec:
         metadata:
           type: object
         spec:
+          properties:
+            channel:
+              description: 'Channel specifies a channel that can be used to resolve
+                a specific addon, eg: stable It will be ignored if Version is specified'
+              type: string
+            patches:
+              items:
+                type: object
+              type: array
+            version:
+              description: Version specifies the exact addon version to be deployed,
+                eg 1.2.3 It should not be specified if Channel is specified
+              type: string
           type: object
         status:
+          properties:
+            errors:
+              items:
+                type: string
+              type: array
+            healthy:
+              type: boolean
+          required:
+          - healthy
           type: object
   version: v1alpha1
 status:

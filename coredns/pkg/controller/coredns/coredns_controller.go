@@ -30,6 +30,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
+	"sigs.k8s.io/kubebuilder-declarative-pattern/pkg/patterns/addon"
 	"sigs.k8s.io/kubebuilder-declarative-pattern/pkg/patterns/addon/pkg/status"
 	"sigs.k8s.io/kubebuilder-declarative-pattern/pkg/patterns/declarative"
 )
@@ -76,6 +77,7 @@ func newReconciler(mgr manager.Manager) *ReconcileCoreDNS {
 		declarative.WithOwner(declarative.SourceAsOwner),
 		declarative.WithLabels(declarative.SourceLabel(mgr.GetScheme())),
 		declarative.WithStatus(status.NewBasic(mgr.GetClient())),
+		declarative.WithObjectTransform(addon.ApplyPatches),
 	)
 
 	return r
