@@ -1,0 +1,7 @@
+apiVersion: addons.k8s.io/v1alpha1
+kind: CoreDNS
+metadata:
+  name: default
+  namespace: kube-system
+spec:
+  channel: stable
