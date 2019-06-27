@@ -126,20 +126,17 @@ func findDNSClusterIP(ctx context.Context, c client.Client) (string, error) {
 		return "", fmt.Errorf("error getting service %s: %v", id, err)
 	}
 
-	clusterIP := kubernetesService.Spec.ClusterIP
-
-	// Assume it is .1, and we want .10
-	ip := net.ParseIP(clusterIP)
+	ip := net.ParseIP(kubernetesService.Spec.ClusterIP)
 	if ip == nil {
-		return "", fmt.Errorf("cannot parse kubernetes ClusterIP %q", clusterIP)
+		return "", fmt.Errorf("cannot parse kubernetes ClusterIP %q", kubernetesService.Spec.ClusterIP)
 	}
-	ipv4 := ip.To4()
-	if ipv4 == nil {
-		return "", fmt.Errorf("expected IPv4 kubernetes ClusterIP %q", clusterIP)
-	}
-	ipv4[3] = 10
 
-	klog.Infof("determined ClusterIP for kube-dns should be %q", ipv4)
+	// The kubernetes Service ClusterIP is the 1st IP in the Service Subnet.
+	// Increment the right-most byte by 9 to get to the 10th address, canonically used for kube-dns.
+	// This works for both IPV4, IPV6, and 16-byte IPV4 addresses.
+	ip[len(ip)-1] += 9
 
-	return ipv4.String(), nil
+	result := ip.String()
+	klog.Infof("determined ClusterIP for kube-dns should be %q", result)
+	return result, nil
 }
