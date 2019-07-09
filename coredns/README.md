@@ -4,7 +4,7 @@ Broadly based on [kubebuilder-declarative-pattern walkthrough](https://github.co
 
 A few differences so we can use go modules and [crane](https://github.com/google/go-containerregistry/blob/master/cmd/crane/doc/crane.md) - neither of which are required, just personal preference.
 
-Created with kubebuilder:
+Created with kubebuilder v1 (v2 will provide you with a different directory structure).
 
 ```bash
 kubebuilder init --dep=false --domain=k8s.io --license apache2
