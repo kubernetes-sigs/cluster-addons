@@ -76,6 +76,8 @@ You can review the code of the [CoreDNS addon operator](coredns-op) in this repo
 
 ### XXX: Discussion of things strictly related to the coredns operator
 
+Diff from `kubebuilder` boilerplate code to coredns addon operator can be viewed here: https://gist.github.com/dholbach/d3a4dd8b7c7d80508ab945f53ef51e09
+
 ### XXX: Running the operator
 
 ## Get started
