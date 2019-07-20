@@ -1,0 +1,10 @@
+apiVersion: addons.config.k8s.io/v1alpha1
+kind: AddonInstallerConfiguration
+addons:
+- ../../kustomize/examples/helloWorld
+- github.com/kubernetes-sigs/kustomize//examples/multibases/dev/?ref=v1.0.6
+- ../../kustomize/examples/helloWorld
+- github.com/kubernetes-sigs/kustomize//examples/multibases/dev/?ref=v1.0.6
+# - docker://stealthybox/kustomize-pod:latest
+# - docker-daemon:stealthybox/kustomize-pod:latest
+# - oci:./stealthybox/kustomize-pod:latest
