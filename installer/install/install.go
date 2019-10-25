@@ -40,19 +40,54 @@ func (r *Runtime) CheckDeps() error {
 }
 
 func (r *Runtime) CheckConfig() error {
+	// check for no refs passed
+	// check for multiple refs passed
+	var noRefs []string
+	var multiRefs []string
+	for _, addon := range r.Config.Addons {
+		if addon.ManifestRef == "" && addon.KustomizeRef == "" {
+			noRefs = append(noRefs, addon.Name)
+		}
+		if addon.ManifestRef != "" && addon.KustomizeRef != "" {
+			multiRefs = append(multiRefs, addon.Name)
+		}
+	}
+	if len(noRefs) > 0 {
+		return fmt.Errorf("AddonInstallerConfiguration contains addons that have no ref: %v", noRefs)
+	}
+	if len(multiRefs) > 0 {
+		return fmt.Errorf("AddonInstallerConfiguration contains addons defining multiple refs: %v", multiRefs)
+	}
+
 	// check for duplicates
-	var duplicates []string
+	var duplicateNames []string
+	nameCounts := map[string]int{}
+	var duplicateRefs []string
 	refCounts := map[string]int{}
-	for _, ref := range r.Config.Addons {
+	for _, addon := range r.Config.Addons {
+		nameCounts[addon.Name]++
+
+		ref := addon.ManifestRef
+		if addon.KustomizeRef != "" {
+			ref = addon.KustomizeRef
+		}
 		refCounts[ref]++
+	}
+	for name, count := range nameCounts {
+		if count >= 2 {
+			duplicateNames = append(duplicateNames, name)
+		}
 	}
 	for ref, count := range refCounts {
 		if count >= 2 {
-			duplicates = append(duplicates, ref)
+			duplicateRefs = append(duplicateRefs, ref)
 		}
 	}
-	if len(duplicates) > 0 {
-		return fmt.Errorf("AddonInstallerConfiguration lists duplicate addons: %v", duplicates)
+	if len(duplicateNames) > 0 {
+		return fmt.Errorf("AddonInstallerConfiguration lists addons with duplicate names: %v", duplicateNames)
+	}
+	if len(duplicateRefs) > 0 {
+		return fmt.Errorf("AddonInstallerConfiguration lists addons with duplicate refs: %v", duplicateRefs)
 	}
 
 	return nil
@@ -70,9 +105,17 @@ func (r *Runtime) InstallAddons() error {
 	return nil
 }
 
-func (r *Runtime) InstallSingleAddon(ref string) error {
-	msg := "...installing " + ref
-	args := []string{"apply", "-k", ref}
+func (r *Runtime) InstallSingleAddon(addon config.Addon) error {
+	ref := addon.ManifestRef
+	args := []string{"apply", "-f", ref}
+	msg := "...installing '" + addon.Name + "' using manifest: " + ref
+
+	if addon.KustomizeRef != "" {
+		ref = addon.KustomizeRef
+		args = []string{"apply", "-k", ref}
+		msg = "...installing '" + addon.Name + "' using kustomize: " + ref
+	}
+
 	if r.Config.DryRun {
 		msg += " (dry run)"
 		args = append(args, "--dry-run")
