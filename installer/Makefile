@@ -24,26 +24,26 @@ shell:
 binary: autogen vendor
 	go build -mod=vendor -o bin/installer sigs.k8s.io/addon-operators/installer/cmd/installer
 
-autogen: /go/bin/deepcopy-gen /go/bin/defaulter-gen /go/bin/conversion-gen
+autogen: go/bin/deepcopy-gen go/bin/defaulter-gen go/bin/conversion-gen
 	# Let the boilerplate be empty
 	touch /tmp/boilerplate
-	/go/bin/deepcopy-gen \
+	deepcopy-gen \
 		--input-dirs ${APIS_DIR}/config,${APIS_DIR}/config/v1alpha1 \
 		--bounding-dirs ${APIS_DIR} \
 		-O zz_generated.deepcopy \
 		-h hack/boilerplate.go.txt
 
-	/go/bin/defaulter-gen \
+	defaulter-gen \
 		--input-dirs ${APIS_DIR}/config/v1alpha1 \
 		-O zz_generated.defaults \
 		-h hack/boilerplate.go.txt
 
-	/go/bin/conversion-gen \
+	conversion-gen \
 		--input-dirs ${APIS_DIR}/config,${APIS_DIR}/config/v1alpha1 \
 		-O zz_generated.conversion \
 		-h hack/boilerplate.go.txt
 
-/go/bin/%: vendor
+go/bin/%: vendor
 	go install k8s.io/code-generator/cmd/$*
 
 vendor:
