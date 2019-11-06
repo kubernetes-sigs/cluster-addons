@@ -12,7 +12,7 @@ This sub-project wants to figure out the scope of cluster addons. We want this t
 
 > What is this not?
 
-This sub-project is not interest in maintaining in all cluster addons. Here we want to create some design pattern, some libraries, some supporting tooling, so everybody can easily create their own operators.
+This sub-project is not interested in maintaining all cluster addons. Here we want to create some design patterns, some libraries, some supporting tooling, so everybody can easily create their own operators.
 
 Not everything will need a cluster addon. Not everyone will want to use an operator.
 
