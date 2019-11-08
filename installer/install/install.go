@@ -29,11 +29,22 @@ type Runtime struct {
 	Stdout io.Writer
 	Stderr io.Writer
 	cmdSet map[*exec.Cmd]struct{}
+
+	// KubeConfigPath is optional and will set the KUBECONFIG for communication to the APIServer
+	KubeConfigPath string
+	// ServerDryRun is optional and gates whether to fetch dryRun diffs from an APIServer
+	ServerDryRun bool
 }
 
 func (r *Runtime) CheckDeps() error {
 	if _, err := exec.LookPath("kubectl"); err != nil {
 		return err
+	}
+
+	if r.KubeConfigPath != "" {
+		if _, err := os.Stat(r.KubeConfigPath); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -118,9 +129,14 @@ func (r *Runtime) InstallSingleAddon(addon config.Addon) error {
 
 	if r.Config.DryRun {
 		msg += " (dry run)"
-		args = append(args, "--dry-run")
+		args = append(args, "--server-dry-run")
 	}
 	fmt.Fprintln(r.Stdout, msg)
+
+	if r.Config.DryRun && !r.ServerDryRun {
+		return nil
+	}
+
 	err := r.runCommand("kubectl", args...)
 	if err != nil {
 		return err
@@ -132,6 +148,10 @@ func (r *Runtime) runCommand(command string, args ...string) error {
 	cmd := exec.Command(command, args...)
 	cmd.Stdout = r.Stdout
 	cmd.Stderr = r.Stderr
+	if r.KubeConfigPath != "" {
+		cmd.Env = os.Environ()
+		cmd.Env = append(cmd.Env, "KUBECONFIG="+r.KubeConfigPath)
+	}
 
 	if r.cmdSet == nil {
 		r.cmdSet = make(map[*exec.Cmd]struct{})

@@ -35,9 +35,10 @@ func cmd() {
 	// noError(fprintConfig(os.Stdout, cfg))
 
 	r := install.Runtime{
-		Config: cfg,
-		Stdout: os.Stdout,
-		Stderr: os.Stderr,
+		Config:       cfg,
+		Stdout:       os.Stdout,
+		Stderr:       os.Stderr,
+		ServerDryRun: true,
 	}
 
 	sigs := make(chan os.Signal, 1)
