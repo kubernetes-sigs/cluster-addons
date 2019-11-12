@@ -118,7 +118,7 @@ func (r *Runtime) InstallAddons() error {
 
 func (r *Runtime) InstallSingleAddon(addon config.Addon) error {
 	ref := addon.ManifestRef
-	args := []string{"apply", "-f", ref}
+	args := []string{"apply", "-R", "-f", ref}
 	msg := "...installing '" + addon.Name + "' using manifest: " + ref
 
 	if addon.KustomizeRef != "" {
@@ -134,6 +134,34 @@ func (r *Runtime) InstallSingleAddon(addon config.Addon) error {
 	fmt.Fprintln(r.Stdout, msg)
 
 	if r.Config.DryRun && !r.ServerDryRun {
+		return nil
+	}
+
+	err := r.runCommand("kubectl", args...)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *Runtime) DeleteSingleAddon(addon config.Addon) error {
+	ref := addon.ManifestRef
+	args := []string{"delete", "-R", "-f", ref}
+	msg := "...deleting '" + addon.Name + "' using manifest: " + ref
+
+	if addon.KustomizeRef != "" {
+		ref = addon.KustomizeRef
+		args = []string{"delete", "-k", ref}
+		msg = "...deleting '" + addon.Name + "' using kustomize: " + ref
+	}
+
+	if r.Config.DryRun {
+		msg += " (dry run)"
+	}
+	fmt.Fprintln(r.Stdout, msg)
+
+	if r.Config.DryRun {
+		// kubectl delete does not support ServerDryRun -- do not run command
 		return nil
 	}
 
