@@ -1,6 +1,6 @@
 # addon-installer
 Installs addons from kustomize packages listed in a 
-configuration file of type `addons.config.k8s.io/AddonInstallerConfiguration`.
+configuration file of type `addons.config.x-k8s.io/AddonInstallerConfiguration`.
 
 ### usage
 ```shell

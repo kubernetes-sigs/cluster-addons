@@ -1,4 +1,4 @@
-apiVersion: addons.config.k8s.io/v1alpha1
+apiVersion: addons.config.x-k8s.io/v1alpha1
 kind: AddonInstallerConfiguration
 addons:
 - name: helloWorld
