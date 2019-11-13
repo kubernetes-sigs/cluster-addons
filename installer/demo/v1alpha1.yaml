@@ -1,0 +1,13 @@
+apiVersion: addons.config.x-k8s.io/v1alpha1
+kind: AddonInstallerConfiguration
+addons:
+- name: helloWorld
+  kustomizeRef: ../../kustomize/examples/helloWorld
+- name: multibases
+  kustomizeRef: github.com/kubernetes-sigs/kustomize//examples/multibases/dev/?ref=v1.0.6
+# - name: docker-example
+#   kustomizeRef: docker://stealthybox/kustomize-pod:latest
+# - name: docker-daemon-example
+#   kustomizeRef: docker-daemon:stealthybox/kustomize-pod:latest
+# - name: oci-example
+#   kustomizeRef: oci:./stealthybox/kustomize-pod:latest
