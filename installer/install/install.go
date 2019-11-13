@@ -146,12 +146,12 @@ func (r *Runtime) InstallSingleAddon(addon config.Addon) error {
 
 func (r *Runtime) DeleteSingleAddon(addon config.Addon) error {
 	ref := addon.ManifestRef
-	args := []string{"delete", "-R", "-f", ref}
+	args := []string{"delete", "-R", "-f", ref, "--ignore-not-found=true"}
 	msg := "...deleting '" + addon.Name + "' using manifest: " + ref
 
 	if addon.KustomizeRef != "" {
 		ref = addon.KustomizeRef
-		args = []string{"delete", "-k", ref}
+		args = []string{"delete", "-k", ref, "--ignore-not-found=true"}
 		msg = "...deleting '" + addon.Name + "' using kustomize: " + ref
 	}
 
