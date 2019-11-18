@@ -1,6 +1,14 @@
 package controllers
 
 import (
+	"context"
+	"fmt"
+	"os"
+	"sort"
+	"strings"
+
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/klog"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -8,6 +16,7 @@ import (
 	"sigs.k8s.io/kubebuilder-declarative-pattern/pkg/patterns/addon"
 	"sigs.k8s.io/kubebuilder-declarative-pattern/pkg/patterns/addon/pkg/status"
 	"sigs.k8s.io/kubebuilder-declarative-pattern/pkg/patterns/declarative"
+	"sigs.k8s.io/kubebuilder-declarative-pattern/pkg/patterns/declarative/pkg/manifest"
 
 	"github.com/go-logr/logr"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -39,12 +48,15 @@ func (r *KubeProxyReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	watchLabels := declarative.SourceLabel(mgr.GetScheme())
 
 	if err := r.Reconciler.Init(mgr, &api.KubeProxy{},
+		declarative.WithRawManifestOperation(injectFlags),
+		declarative.WithRawManifestOperation(replaceNamespacePattern("{{.Namespace}}")),
 		declarative.WithObjectTransform(declarative.AddLabels(labels)),
+		declarative.WithObjectTransform(OverrideApiserver),
 		declarative.WithOwner(declarative.SourceAsOwner),
 		declarative.WithLabels(watchLabels),
 		declarative.WithStatus(status.NewBasic(mgr.GetClient())),
-		// TODO: add an application to your manifest:  declarative.WithObjectTransform(addon.TransformApplicationFromStatus),
-		// TODO: add an application to your manifest:  declarative.WithManagedApplication(watchLabels),
+		declarative.WithObjectTransform(addon.TransformApplicationFromStatus),
+		declarative.WithManagedApplication(watchLabels),
 		declarative.WithObjectTransform(addon.ApplyPatches),
 	); err != nil {
 		return err
@@ -67,5 +79,133 @@ func (r *KubeProxyReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		return err
 	}
 
+	return nil
+}
+
+// replaceNamespacePattern fills in the namespace placeholder patterns with the actual namespace from the crd
+func replaceNamespacePattern(nspatterns ...string) declarative.ManifestOperation {
+	return func(ctx context.Context, o declarative.DeclarativeObject, manifest string) (string, error) {
+		for _, pattern := range nspatterns {
+			if strings.Index(manifest, pattern) != -1 {
+				manifest = strings.Replace(manifest, pattern, o.GetNamespace(), -1)
+			}
+		}
+		return manifest, nil
+	}
+}
+
+func injectFlags(ctx context.Context, object declarative.DeclarativeObject, s string) (string, error) {
+	o := object.(*api.KubeProxy)
+	params := []string{
+		"--v=2",
+		"--iptables-sync-period=1m",
+		"--iptables-min-sync-period=10s",
+		"--ipvs-sync-period=1m",
+		"--ipvs-min-sync-period=10s"}
+	if o.Spec.ClusterCIDR != "" {
+		params = append(params, "--cluster-cidr="+o.Spec.ClusterCIDR)
+	}
+	s = strings.Replace(s, "{{params}}", strings.Join(params, " "), -1)
+	return s, nil
+}
+
+// SetEnvironmentVariables sets the env values on a pod template in the specified object
+func SetEnvironmentVariables(o *manifest.Object, env map[string]string) error {
+	// Using the unstructured library avoids problems when the manifest is using a newer API type thanwe are compiled with - as long as the field structure hasn't changed.
+	if err := o.MutateContainers(func(container map[string]interface{}) error {
+		envList, _, err := unstructured.NestedSlice(container, "env")
+		if err != nil {
+			return fmt.Errorf("error reading container env: %v", err)
+		}
+		for k, v := range env {
+			foundK := false
+			for _, e := range envList {
+				m, ok := e.(map[string]interface{})
+				if !ok {
+					return fmt.Errorf("env var was not an object: %v", err)
+				}
+				name, found, err := unstructured.NestedString(m, "name")
+				if err != nil {
+					return err
+				}
+				if found && name == k {
+					if err := unstructured.SetNestedField(m, v, "value"); err != nil {
+						return err
+					}
+					foundK = true
+				}
+			}
+			if !foundK {
+				envList = append(envList, map[string]interface{}{
+					"name":  k,
+					"value": v,
+				})
+			}
+		}
+		// Sort env values by name so we have a consistent order
+		sort.Slice(envList, func(i, j int) bool {
+			mapI, okI := envList[i].(map[string]interface{})
+			mapJ, okJ := envList[j].(map[string]interface{})
+			if !okJ {
+				return false
+			}
+			if !okI {
+				return true
+			}
+			kI, foundI := mapI["name"]
+			kJ, foundJ := mapJ["name"]
+			if !foundJ {
+				return false
+			}
+			if !foundI {
+				return true
+			}
+			return kI.(string) < kJ.(string)
+		})
+		if err := unstructured.SetNestedSlice(container, envList, "env"); err != nil {
+			return fmt.Errorf("error setting env vars: %v", err)
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
+	return nil
+}
+
+// OverrideApiserver sets environment variables, hostNetwork & dns policy so that we don't rely on kube-proxy to reach the api server
+func OverrideApiserver(ctx context.Context, o declarative.DeclarativeObject, manifest *manifest.Objects) error {
+	for _, o := range manifest.Items {
+		if o.Kind == "DaemonSet" {
+			// KubeProxy (and kubelet) are special: it has to find the apiserver directly,
+			// other clients use the VIP that kubeproxy configures.
+			//
+			// Because of this we need a special env var to allow for node kube-proxies to have a different endpoint than the operator
+			// (If the operator runs on the master, it can use 127.0.0.1; we definitely can't use that for the node kube-proxy)
+			// We still fall-back to the existing mechanisms - KUBERNETES_SERVICE_HOST, then a hard-coded default value
+			master := os.Getenv("KUBEPROXY_KUBERNETES_SERVICE_HOST")
+			if master == "" {
+				master = os.Getenv("KUBERNETES_SERVICE_HOST")
+			}
+			if master == "" {
+				master = "kubernetes-master"
+				klog.Warningf("using fallback for KUBERNETES_SERVICE_HOST: %v", master)
+			}
+			port := os.Getenv("KUBERNETES_SERVICE_PORT")
+			if port == "" {
+				port = "443"
+			}
+			env := map[string]string{"KUBERNETES_SERVICE_HOST": master, "KUBERNETES_SERVICE_PORT": port}
+			if err := SetEnvironmentVariables(o, env); err != nil {
+				return err
+			}
+			if err := o.SetNestedField(true, "spec", "template", "spec", "hostNetwork"); err != nil {
+				return fmt.Errorf("error setting hostNetwork: %v", err)
+			}
+			// To resolve the kubernetes-master field
+			if err := o.SetNestedField("Default", "spec", "template", "spec", "dnsPolicy"); err != nil {
+				return fmt.Errorf("error setting dnsPolicy: %v", err)
+			}
+		}
+	}
 	return nil
 }

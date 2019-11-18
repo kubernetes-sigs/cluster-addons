@@ -36,6 +36,8 @@ spec:
               description: 'Channel specifies a channel that can be used to resolve
                 a specific addon, eg: stable It will be ignored if Version is specified'
               type: string
+            clusterCidr:
+              type: string
             patches:
               items:
                 type: object
