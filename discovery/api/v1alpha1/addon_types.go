@@ -1,5 +1,4 @@
 /*
-Copyright 2020 The Kubernetes authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,30 +16,67 @@ limitations under the License.
 package v1alpha1
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
-
 // AddonSpec defines the desired state of Addon
-type AddonSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+type AddonSpec struct{}
 
-	// Foo is an example field of Addon. Edit Addon_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+// AddonStatus describes the observed state of an addon and its components.
+type AddonStatus struct {
+	// Components describes resources that compose the addon.
+	// +optional
+	Components *Components `json:"components,omitempty"`
 }
 
-// AddonStatus defines the observed state of Addon
-type AddonStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+// ConditionType codifies a condition's type.
+type ConditionType string
+
+// Conditions represent the latest available observations of an object's state
+type Condition struct {
+	// Type of condition.
+	Type ConditionType `json:"type"`
+	// Status of the condition, one of True, False, Unknown.
+	Status corev1.ConditionStatus `json:"status"`
+	// The reason for the condition's last transition.
+	// +optional
+	Reason string `json:"reason,omitempty"`
+	// A human readable message indicating details about the transition.
+	// +optional
+	Message string `json:"message,omitempty"`
+	// Last time the condition was probed
+	// +optional
+	LastUpdateTime *metav1.Time `json:"lastUpdateTime,omitempty"`
+	// Last time the condition transitioned from one status to another.
+	// +optional
+	LastTransitionTime *metav1.Time `json:"lastTransitionTime,omitempty"`
+}
+
+// Components tracks the resources that compose an addon.
+type Components struct {
+	// LabelSelector is a label query over a set of resources used to select the addon's components
+	LabelSelector *metav1.LabelSelector `json:"labelSelector"`
+	// Refs are a set of references to the addon's component resources, selected with LabelSelector.
+	// +optional
+	Refs []RichReference `json:"refs,omitempty"`
+}
+
+// RichReference is a reference to a resource, enriched with its status conditions.
+type RichReference struct {
+	*corev1.ObjectReference `json:",inline"`
+	// Conditions represents the latest state of the object.
+	// +optional
+	// +patchMergeKey=type
+	// +patchStrategy=merge
+	Conditions []Condition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type"`
 }
 
 // +kubebuilder:object:root=true
+// +kubebuilder:resource:scope=Cluster
+// +kubebuilder:storageversion
 
-// Addon is the Schema for the addons API
+// Addon represents a cluster addon.
 type Addon struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -51,7 +87,7 @@ type Addon struct {
 
 // +kubebuilder:object:root=true
 
-// AddonList contains a list of Addon
+// AddonList contains a list of Addons.
 type AddonList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
