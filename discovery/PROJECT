@@ -1,0 +1,7 @@
+domain: addons.x-k8s.io
+repo: sigs.k8s.io/addon-operators/discovery
+resources:
+- group: discovery
+  kind: Addon
+  version: v1alpha1
+version: "2"
