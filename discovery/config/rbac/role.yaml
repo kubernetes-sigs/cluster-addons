@@ -7,22 +7,26 @@ metadata:
   name: manager-role
 rules:
 - apiGroups:
+  - '*'
+  resources:
+  - '*'
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
   - discovery.addons.x-k8s.io
   resources:
   - addons
   verbs:
   - create
   - delete
-  - get
-  - list
   - patch
   - update
-  - watch
 - apiGroups:
   - discovery.addons.x-k8s.io
   resources:
   - addons/status
   verbs:
-  - get
   - patch
   - update

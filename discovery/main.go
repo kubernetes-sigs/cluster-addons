@@ -21,13 +21,15 @@ import (
 	"os"
 
 	"k8s.io/apimachinery/pkg/runtime"
-	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
+	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
+	k8sscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-	discoveryv1alpha1 "sigs.k8s.io/addon-operators/discovery/api/v1alpha1"
-	"sigs.k8s.io/addon-operators/discovery/controllers"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	// +kubebuilder:scaffold:imports
+
+	discoveryv1alpha1 "sigs.k8s.io/cluster-addons/discovery/api/v1alpha1"
+	"sigs.k8s.io/cluster-addons/discovery/controllers"
 )
 
 var (
@@ -36,9 +38,8 @@ var (
 )
 
 func init() {
-	_ = clientgoscheme.AddToScheme(scheme)
-
-	_ = discoveryv1alpha1.AddToScheme(scheme)
+	utilruntime.Must(k8sscheme.AddToScheme(scheme))
+	utilruntime.Must(discoveryv1alpha1.AddToScheme(scheme))
 	// +kubebuilder:scaffold:scheme
 }
 
@@ -65,11 +66,17 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err = (&controllers.AddonReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("Addon"),
-		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
+	reconciler, err := controllers.NewAddonReconciler(
+		mgr.GetClient(),
+		ctrl.Log.WithName("controllers").WithName("Addon"),
+		mgr.GetScheme(),
+	)
+	if err != nil {
+		setupLog.Error(err, "unable to create reconciler", "controller", "Addon")
+		os.Exit(1)
+	}
+
+	if err = reconciler.SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Addon")
 		os.Exit(1)
 	}

@@ -1,5 +1,5 @@
 domain: addons.x-k8s.io
-repo: sigs.k8s.io/addon-operators/discovery
+repo: sigs.k8s.io/cluster-addons/discovery
 resources:
 - group: discovery
   kind: Addon
