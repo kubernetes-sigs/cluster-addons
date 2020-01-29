@@ -16,7 +16,7 @@ limitations under the License.
 package apis
 
 import (
-	"sigs.k8s.io/addon-operators/coredns/pkg/apis/addons/v1alpha1"
+	"sigs.k8s.io/cluster-addons/coredns/pkg/apis/addons/v1alpha1"
 )
 
 func init() {

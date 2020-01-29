@@ -21,7 +21,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"sigs.k8s.io/addon-operators/installer/install"
+	"sigs.k8s.io/cluster-addons/installer/install"
 )
 
 func main() {

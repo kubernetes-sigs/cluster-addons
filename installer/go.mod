@@ -1,4 +1,4 @@
-module sigs.k8s.io/addon-operators/installer
+module sigs.k8s.io/cluster-addons/installer
 
 require (
 	github.com/spf13/pflag v1.0.3
