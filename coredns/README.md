@@ -17,7 +17,7 @@ Switched to go modules:
 
 ```bash
 export GO111MODULE=on
-go mod init sigs.k8s.io/addon-operators/coredns
+go mod init sigs.k8s.io/cluster-addons/coredns
 
 # Insert our tools.go for extra dependencies
 cp ../tools.go tools.go

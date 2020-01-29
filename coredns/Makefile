@@ -10,7 +10,7 @@ test: generate fmt vet manifests
 
 # Build manager binary
 manager: generate fmt vet
-	go build -o bin/manager sigs.k8s.io/addon-operators/coredns/cmd/manager
+	go build -o bin/manager sigs.k8s.io/cluster-addons/coredns/cmd/manager
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
 run: generate fmt vet

@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-PROJECT = sigs.k8s.io/addon-operators/installer
+PROJECT = sigs.k8s.io/cluster-addons/installer
 APIS_DIR = ${PROJECT}/pkg/apis
 CACHE_DIR = /tmp/go-cache
 
@@ -11,18 +11,18 @@ build:
 shell:
 	mkdir -p $(CACHE_DIR)/bin $(CACHE_DIR)/src $(CACHE_DIR)/cache bin/cache
 	docker run -it \
-		-v $(shell pwd):/go/src/sigs.k8s.io/addon-operators/installer \
+		-v $(shell pwd):/go/src/sigs.k8s.io/cluster-addons/installer \
 		-v $(CACHE_DIR)/bin:/go/bin \
 		-v $(CACHE_DIR)/src:/go/src \
 		-v $(CACHE_DIR)/cache:/.cache/go-build \
-		-w /go/src/sigs.k8s.io/addon-operators/installer \
+		-w /go/src/sigs.k8s.io/cluster-addons/installer \
 		-u $(shell id -u):$(shell id -g) \
 		-e GO111MODULE=on \
 		golang:1.11 \
 		$(COMMAND)
 
 binary: autogen vendor
-	go build -mod=vendor -o bin/installer sigs.k8s.io/addon-operators/installer/cmd/installer
+	go build -mod=vendor -o bin/installer sigs.k8s.io/cluster-addons/installer/cmd/installer
 
 autogen: go/bin/deepcopy-gen go/bin/defaulter-gen go/bin/conversion-gen
 	# Let the boilerplate be empty
@@ -53,7 +53,7 @@ vendor:
 	go mod verify
 
 only-build:
-	$(MAKE) shell COMMAND="go build -mod=vendor -o bin/installer sigs.k8s.io/addon-operators/installer/cmd/installer"
+	$(MAKE) shell COMMAND="go build -mod=vendor -o bin/installer sigs.k8s.io/cluster-addons/installer/cmd/installer"
 
 clean:
 	rm -rf bin vendor go.sum go.mod

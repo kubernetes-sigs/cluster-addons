@@ -16,7 +16,7 @@ limitations under the License.
 package controller
 
 import (
-	"sigs.k8s.io/addon-operators/coredns/pkg/controller/coredns"
+	"sigs.k8s.io/cluster-addons/coredns/pkg/controller/coredns"
 )
 
 func init() {

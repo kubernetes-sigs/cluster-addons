@@ -23,9 +23,9 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer/json"
-	"sigs.k8s.io/addon-operators/installer/pkg/apis/config"
-	"sigs.k8s.io/addon-operators/installer/pkg/apis/config/scheme"
-	"sigs.k8s.io/addon-operators/installer/pkg/apis/config/v1alpha1"
+	"sigs.k8s.io/cluster-addons/installer/pkg/apis/config"
+	"sigs.k8s.io/cluster-addons/installer/pkg/apis/config/scheme"
+	"sigs.k8s.io/cluster-addons/installer/pkg/apis/config/v1alpha1"
 )
 
 func readConfig(f *flags) (*config.AddonInstallerConfiguration, error) {

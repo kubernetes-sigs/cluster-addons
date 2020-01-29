@@ -22,7 +22,7 @@ The lifecycle of a cluster addon is managed alongside the lifecycle of the clust
 
 > What's your current agenda and timeline?
 
-For now we want to create an actual [cluster addon we deemed as straight-forward](https://github.com/kubernetes-sigs/addon-operators/issues/3), so we have actual code to look at, can learn from this experience (and what others have done in the past) and then take on some of the bigger philosophical questions.
+For now we want to create an actual [cluster addon we deemed as straight-forward](https://github.com/kubernetes-sigs/cluster-addons/issues/3), so we have actual code to look at, can learn from this experience (and what others have done in the past) and then take on some of the bigger philosophical questions.
 
 > Who does this?
 

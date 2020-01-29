@@ -1,4 +1,4 @@
-module sigs.k8s.io/addon-operators/coredns
+module sigs.k8s.io/cluster-addons/coredns
 
 go 1.12
 

@@ -21,7 +21,7 @@ import (
 	"os"
 	"os/exec"
 
-	"sigs.k8s.io/addon-operators/installer/pkg/apis/config"
+	"sigs.k8s.io/cluster-addons/installer/pkg/apis/config"
 )
 
 type Runtime struct {

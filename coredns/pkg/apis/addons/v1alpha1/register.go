@@ -18,7 +18,7 @@ limitations under the License.
 // Package v1alpha1 contains API Schema definitions for the addons v1alpha1 API group
 // +k8s:openapi-gen=true
 // +k8s:deepcopy-gen=package,register
-// +k8s:conversion-gen=sigs.k8s.io/addon-operators/coredns/pkg/apis/addons
+// +k8s:conversion-gen=sigs.k8s.io/cluster-addons/coredns/pkg/apis/addons
 // +k8s:defaulter-gen=TypeMeta
 // +groupName=addons.k8s.io
 package v1alpha1

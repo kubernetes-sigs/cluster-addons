@@ -23,7 +23,7 @@ import (
 
 	conversion "k8s.io/apimachinery/pkg/conversion"
 	runtime "k8s.io/apimachinery/pkg/runtime"
-	config "sigs.k8s.io/addon-operators/installer/pkg/apis/config"
+	config "sigs.k8s.io/cluster-addons/installer/pkg/apis/config"
 )
 
 func init() {

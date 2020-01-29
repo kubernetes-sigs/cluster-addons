@@ -14,4 +14,4 @@ limitations under the License.
 */
 
 // +k8s:deepcopy-gen=package
-package config // import "sigs.k8s.io/addon-operators/installer/pkg/apis/config"
+package config // import "sigs.k8s.io/cluster-addons/installer/pkg/apis/config"

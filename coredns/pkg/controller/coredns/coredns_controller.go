@@ -23,7 +23,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/klog"
-	api "sigs.k8s.io/addon-operators/coredns/pkg/apis/addons/v1alpha1"
+	api "sigs.k8s.io/cluster-addons/coredns/pkg/apis/addons/v1alpha1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
