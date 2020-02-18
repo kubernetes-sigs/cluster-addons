@@ -6,3 +6,9 @@ approvers:
   - justinsb
   - stealthybox
   - sig-cluster-lifecycle-leads
+reviewers:
+  - dholbach
+  - johnsonj
+  - justinsb
+  - stealthybox
+  - atoato88
