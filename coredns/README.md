@@ -70,6 +70,18 @@ EOF
 
 ```
 
+Running the operator locally:
+
+```bash
+export GOPATH=<go-path>
+go mod vendor
+make
+go build -o bin/manager sigs.k8s.io/cluster-addons/coredns/cmd/manager
+make install
+bin/manager
+```
+We can see logs from the operator!
+
 
 Generally follow the [main instructions](https://github.com/kubernetes-sigs/kubebuilder-declarative-pattern/blob/master/docs/addon/walkthrough/README.md) at this point:
 
