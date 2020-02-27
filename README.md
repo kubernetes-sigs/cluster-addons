@@ -1,14 +1,16 @@
-# Addon Operators
+# Cluster Addons
 
-Repo for [cluster addon operators](https://github.com/kubernetes/enhancements/blob/master/keps/sig-cluster-lifecycle/addons/0035-20190128-addons-via-operators.md). More discussion can be seen in the [original KEP PR](https://github.com/kubernetes/enhancements/pull/746).
+Cluster Addons is a sub-project of [SIG-Cluster-Lifecycle](https://github.com/kubernetes/community/tree/master/sig-cluster-lifecycle). Addon management has been a problem of cluster tooling for a long time.
+
+This sub-project wants to figure out the best way to install, manage and deliver cluster addons.
+
+In this repository we explore ideas for all of the above. [Cluster addon operators](https://github.com/kubernetes/enhancements/blob/master/keps/sig-cluster-lifecycle/addons/0035-20190128-addons-via-operators.md) in particular.
 
 ## Frequently asked questions
 
 > What is this?
 
-Cluster Addons is a sub-project of [SIG-Cluster-Lifecycle](https://github.com/kubernetes/community/tree/master/sig-cluster-lifecycle). Addon management has been a problem of cluster tooling for a long time.
-
-This sub-project wants to figure out the scope of cluster addons. We want this to be manageable and not try to solve every single deployment problem.
+Born out of the discussion in the [original KEP PR](https://github.com/kubernetes/enhancements/pull/746), we set up the sub-project with the goal to explore addon operators, since then we took on a number of other challenges.
 
 > What is this not?
 
@@ -22,7 +24,14 @@ The lifecycle of a cluster addon is managed alongside the lifecycle of the clust
 
 > What's your current agenda and timeline?
 
-For now we want to create an actual [cluster addon we deemed as straight-forward](https://github.com/kubernetes-sigs/cluster-addons/issues/3), so we have actual code to look at, can learn from this experience (and what others have done in the past) and then take on some of the bigger philosophical questions.
+We
+
+- created an actual [addon operator we deemed as straight-forward](https://github.com/kubernetes-sigs/cluster-addons/tree/master/coredns), so we have actual code to look
+- wrote an [installer library](https://github.com/kubernetes-sigs/cluster-addons/tree/master/installer) to install addons into the cluster
+- added support for [addon operators to kubebuilder](https://github.com/kubernetes-sigs/kubebuilder/tree/master/plugins)
+- started work on integrating the addon installer into kubeadm and kops
+- had a look getting agreement on manifest bundles
+- started quite a few other experiments
 
 > Who does this?
 
