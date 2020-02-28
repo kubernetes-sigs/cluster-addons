@@ -1,5 +1,3 @@
-
-
 package controllers
 
 import (
@@ -24,7 +22,7 @@ var _ reconcile.Reconciler = &DashboardReconciler{}
 // DashboardReconciler reconciles a Dashboard object
 type DashboardReconciler struct {
 	client.Client
-	Log logr.Logger
+	Log    logr.Logger
 	Scheme *runtime.Scheme
 
 	declarative.Reconciler
