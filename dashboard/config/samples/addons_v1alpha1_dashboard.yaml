@@ -1,0 +1,7 @@
+apiVersion: addons.k8s.io/v1alpha1
+kind: Dashboard
+metadata:
+  name: dashboard-sample
+spec:
+  # Add fields here
+  foo: bar

@@ -1,0 +1,20 @@
+# permissions to do viewer dashboards.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: dashboard-viewer-role
+rules:
+- apiGroups:
+  - addons.k8s.io
+  resources:
+  - dashboards
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - addons.k8s.io
+  resources:
+  - dashboards/status
+  verbs:
+  - get

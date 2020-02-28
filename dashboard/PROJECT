@@ -1,0 +1,7 @@
+domain: k8s.io
+repo: sigs.k8s.io/cluster-addons/dashboard
+resources:
+- group: addons
+  kind: Dashboard
+  version: v1alpha1
+version: "2"
