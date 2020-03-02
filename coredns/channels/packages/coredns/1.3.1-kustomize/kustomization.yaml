@@ -1,0 +1,15 @@
+# resource definition in YAML.  These are the resource
+# files that kustomize reads, modifies and emits as a
+# YAML string, with resources separated by document
+# markers ("---").
+resources:
+- services.yaml
+- deployment.yaml
+configMapGenerator:
+- name: coredns
+  namespace: kube-system
+  files:
+  - Corefile
+generatorOptions:
+  labels:
+      addonmanager.kubernetes.io/mode: EnsureExists

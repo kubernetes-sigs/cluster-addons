@@ -78,6 +78,7 @@ func newReconciler(mgr manager.Manager) *ReconcileCoreDNS {
 		declarative.WithLabels(declarative.SourceLabel(mgr.GetScheme())),
 		declarative.WithStatus(status.NewBasic(mgr.GetClient())),
 		declarative.WithObjectTransform(addon.ApplyPatches),
+		declarative.WithApplyKustomize(),
 	)
 
 	return r
