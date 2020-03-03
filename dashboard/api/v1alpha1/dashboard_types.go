@@ -5,24 +5,15 @@ import (
 	addonv1alpha1 "sigs.k8s.io/kubebuilder-declarative-pattern/pkg/patterns/addon/pkg/apis/v1alpha1"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
-
 // DashboardSpec defines the desired state of Dashboard
 type DashboardSpec struct {
 	addonv1alpha1.CommonSpec `json:",inline"`
 	addonv1alpha1.PatchSpec  `json:",inline"`
-
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
 }
 
 // DashboardStatus defines the observed state of Dashboard
 type DashboardStatus struct {
 	addonv1alpha1.CommonStatus `json:",inline"`
-
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
 }
 
 // +kubebuilder:object:root=true
@@ -37,6 +28,7 @@ type Dashboard struct {
 }
 
 var _ addonv1alpha1.CommonObject = &Dashboard{}
+var _ addonv1alpha1.Patchable = &Dashboard{}
 
 func (o *Dashboard) ComponentName() string {
 	return "dashboard"

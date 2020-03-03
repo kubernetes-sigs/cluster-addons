@@ -13,6 +13,13 @@
 # limitations under the License.
 
 apiVersion: v1
+kind: Namespace
+metadata:
+  name: kubernetes-dashboard
+
+---
+
+apiVersion: v1
 kind: ServiceAccount
 metadata:
   labels:
@@ -180,7 +187,7 @@ spec:
     spec:
       containers:
         - name: kubernetes-dashboard
-          image: kubernetesui/dashboard:v2.0.0-rc5
+          image: kubernetesui/dashboard:v2.0.0-rc3
           imagePullPolicy: Always
           ports:
             - containerPort: 8443
@@ -293,3 +300,30 @@ spec:
       volumes:
         - name: tmp-volume
           emptyDir: {}
+
+---
+
+apiVersion: app.k8s.io/v1beta1
+kind: Application
+metadata:
+  name: kubernetes-dashboard
+  namespace: kube-system
+spec:
+  descriptor:
+    type: "kubernetes-dashboard"
+    description: |
+      This is a demo of the kubebuilder-declarative-pattern project and not a production ready installation.
+      Kubernetes Dashboard is a general purpose, web-based UI for Kubernetes clusters.
+      It allows users to manage applications running in the cluster and troubleshoot them, as well as manage the cluster itself.
+    icons:
+    - src: "https://github.com/kubernetes/kubernetes/raw/master/logo/logo.png"
+      type: "image/png"
+    maintainers:
+    - name: Maintainer
+      email: maintainer@example.org
+    keywords:
+    - "addon"
+    - "dashboard"
+    links:
+    - description: Project Homepage
+      url: "https://github.com/kubernetes/dashboard"
