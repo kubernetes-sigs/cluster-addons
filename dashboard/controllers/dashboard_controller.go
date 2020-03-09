@@ -39,31 +39,34 @@ type DashboardReconciler struct {
 	Scheme *runtime.Scheme
 
 	declarative.Reconciler
+	watchLabels declarative.LabelMaker
+}
+
+func (r *DashboardReconciler) setupReconciler(mgr ctrl.Manager) error {
+	labels := map[string]string{
+		"k8s-app": "kubernetes-dashboard",
+	}
+
+	r.watchLabels = declarative.SourceLabel(mgr.GetScheme())
+
+	return r.Reconciler.Init(mgr, &api.Dashboard{},
+		declarative.WithObjectTransform(declarative.AddLabels(labels)),
+		declarative.WithOwner(declarative.SourceAsOwner),
+		declarative.WithLabels(r.watchLabels),
+		declarative.WithStatus(status.NewBasic(mgr.GetClient())),
+		declarative.WithPreserveNamespace(),
+		declarative.WithApplyPrune(),
+		declarative.WithObjectTransform(addon.TransformApplicationFromStatus),
+		declarative.WithManagedApplication(r.watchLabels),
+		declarative.WithObjectTransform(addon.ApplyPatches),
+	)
 }
 
 // +kubebuilder:rbac:groups=addons.k8s.io,resources=dashboards,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=addons.k8s.io,resources=dashboards/status,verbs=get;update;patch
 
 func (r *DashboardReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	addon.Init()
-
-	labels := map[string]string{
-		"k8s-app": "dashboard",
-	}
-
-	watchLabels := declarative.SourceLabel(mgr.GetScheme())
-
-	if err := r.Reconciler.Init(mgr, &api.Dashboard{},
-		declarative.WithObjectTransform(declarative.AddLabels(labels)),
-		declarative.WithOwner(declarative.SourceAsOwner),
-		declarative.WithLabels(watchLabels),
-		declarative.WithStatus(status.NewBasic(mgr.GetClient())),
-		declarative.WithPreserveNamespace(),
-		declarative.WithApplyPrune(),
-		declarative.WithObjectTransform(addon.TransformApplicationFromStatus),
-		declarative.WithManagedApplication(watchLabels),
-		declarative.WithObjectTransform(addon.ApplyPatches),
-	); err != nil {
+	if err := r.setupReconciler(mgr); err != nil {
 		return err
 	}
 
@@ -79,7 +82,7 @@ func (r *DashboardReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	}
 
 	// Watch for changes to deployed objects
-	_, err = declarative.WatchAll(mgr.GetConfig(), c, r, watchLabels)
+	_, err = declarative.WatchAll(mgr.GetConfig(), c, r, r.watchLabels)
 	if err != nil {
 		return err
 	}
