@@ -312,7 +312,6 @@ spec:
   descriptor:
     type: "kubernetes-dashboard"
     description: |
-      This is a demo of the kubebuilder-declarative-pattern project and not a production ready installation.
       Kubernetes Dashboard is a general purpose, web-based UI for Kubernetes clusters.
       It allows users to manage applications running in the cluster and troubleshoot them, as well as manage the cluster itself.
     icons:
@@ -320,7 +319,7 @@ spec:
       type: "image/png"
     maintainers:
     - name: Maintainer
-      email: maintainer@example.org
+      url: https://github.com/kubernetes/dashboard
     keywords:
     - "addon"
     - "dashboard"

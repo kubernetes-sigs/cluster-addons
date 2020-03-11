@@ -179,11 +179,10 @@ spec:
       type: "image/png"
     maintainers:
     - name: Maintainer
-      email: maintainer@example.org
+      url: https://github.com/kubernetes/dashboard
     keywords:
     - "addon"
     - "dashboard"
     links:
     - description: Project Homepage
       url: "https://github.com/kubernetes/dashboard"
-

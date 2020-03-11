@@ -60,8 +60,8 @@ spec:
     - description: Project Homepage
       url: https://github.com/kubernetes/dashboard
     maintainers:
-    - email: maintainer@k8s.io
-      name: Maintainer
+    - name: Maintainer
+      url: https://github.com/kubernetes/dashboard
     type: kubernetes-dashboard
     version: ""
   selector:

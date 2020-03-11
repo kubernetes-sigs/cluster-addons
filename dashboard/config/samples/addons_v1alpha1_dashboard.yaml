@@ -4,4 +4,4 @@ metadata:
   name: dashboard-sample
   namespace: kube-system
 spec:
-  channel: develop
+  channel: stable
