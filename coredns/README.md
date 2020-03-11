@@ -8,9 +8,9 @@ Created with kubebuilder:
 
 ```bash
 export KUBEBUILDER_ENABLE_PLUGINS=1
-kubebuilder init --fetch-dep=false --domain=k8s.io --license=apache2
+kubebuilder init --fetch-deps=false --domain=x-k8s.io --license=apache2
 
-kubebuilder create api --pattern addon --controller=true --example=false --group=addons --kind=CoreDNS --make=false --namespaced=true --resource=true --version=v1alpha1
+kubebuilder create api --pattern=addon --controller=true --example=false --group=addons --kind=CoreDNS --make=false --namespaced=true --resource=true --version=v1alpha1
 
 ```
 
