@@ -1,5 +1,5 @@
 # addon-installer
-Installs addons from kustomize packages listed in a 
+Installs addons from kustomize packages listed in a
 configuration file of type `addons.config.x-k8s.io/AddonInstallerConfiguration`.
 
 ### usage
@@ -15,4 +15,11 @@ make
 
 # build just the binary from existing files
 make only-build
+```
+
+## development on Mac OS
+```shell
+# fetch deps + regenerate all API's
+make binary
+
 ```
