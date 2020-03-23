@@ -1,0 +1,16 @@
+.:53 {
+    errors
+    health
+    kubernetes {{ .DNSDomain }} in-addr.arpa ip6.arpa {
+       upstream
+       pods insecure
+       fallthrough in-addr.arpa ip6.arpa
+       ttl 30
+    }
+    prometheus :9153
+    forward . /etc/resolv.conf
+    cache 30
+    loop
+    reload
+    loadbalance
+}

@@ -1,0 +1,24 @@
+# resource definition in YAML.  These are the resource
+# files that kustomize reads, modifies and emits as a
+# YAML string, with resources separated by document
+# markers ("---").
+resources:
+  - service.yaml
+  - deployment.yaml
+  - serviceaccount.yaml
+  - clusterrole.yaml
+  - clusterrolebinding.yaml
+
+configMapGenerator:
+  - name: coredns
+    namespace: kube-system
+    {{ .Corefile }}
+
+
+generatorOptions:
+  labels:
+    addonmanager.kubernetes.io/mode: EnsureExists
+    addons.x-k8s.io/coredns: coredns-operator
+    k8s-app: kube-dns
+    kubernetes.io/cluster-service: "true"
+    kubernetes.io/name: CoreDNS
