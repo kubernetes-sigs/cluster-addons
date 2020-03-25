@@ -1,0 +1,7 @@
+domain: x-k8s.io
+repo: sigs.k8s.io/cluster-addons
+resources:
+- group: addons
+  kind: MetricsServer
+  version: v1alpha1
+version: "2"
