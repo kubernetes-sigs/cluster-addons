@@ -16,10 +16,3 @@ make
 # build just the binary from existing files
 make only-build
 ```
-
-## development on Mac OS
-```shell
-# fetch deps + regenerate all API's
-make binary
-
-```

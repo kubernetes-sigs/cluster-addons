@@ -2,10 +2,11 @@ SHELL := /bin/bash
 PROJECT = sigs.k8s.io/cluster-addons/installer
 APIS_DIR = ${PROJECT}/pkg/apis
 CACHE_DIR = /tmp/go-cache
+UNAME := $(shell uname -s)
 
 all: build
 
-build: 
+build:
 	$(MAKE) shell COMMAND="make binary"
 
 shell:
@@ -53,7 +54,13 @@ vendor:
 	go mod verify
 
 only-build:
+ifeq ($(UNAME),Darwin)
+	echo Darwin
+	make binary
+else
+	echo Linux
 	$(MAKE) shell COMMAND="go build -mod=vendor -o bin/installer sigs.k8s.io/cluster-addons/installer/cmd/installer"
+endif
 
 clean:
 	rm -rf bin vendor go.sum go.mod
