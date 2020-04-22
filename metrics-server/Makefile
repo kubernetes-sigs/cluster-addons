@@ -50,12 +50,16 @@ fmt:
 vet:
 	go vet ./...
 
+# Run go mod vendor
+vendor:
+	go mod vendor
+
 # Generate code
 generate: controller-gen
 	$(CONTROLLER_GEN) object:headerFile=./hack/boilerplate.go.txt paths="./..."
 
 # Build the docker image
-docker-build: test
+docker-build: vendor test
 	docker build . -t ${IMG}
 
 # Push the docker image
