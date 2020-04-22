@@ -62,9 +62,6 @@ func (r *DashboardReconciler) setupReconciler(mgr ctrl.Manager) error {
 	)
 }
 
-// +kubebuilder:rbac:groups=addons.x-k8s.io,resources=dashboards,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=addons.x-k8s.io,resources=dashboards/status,verbs=get;update;patch
-
 func (r *DashboardReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	if err := r.setupReconciler(mgr); err != nil {
 		return err
@@ -89,3 +86,18 @@ func (r *DashboardReconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 	return nil
 }
+
+// for WithApplyPrune
+// +kubebuilder:rbac:groups=*,resources=*,verbs=list
+
+// +kubebuilder:rbac:groups=addons.k8s.io,resources=dashboards,verbs=get;list;watch;create;update;delete;patch
+// +kubebuilder:rbac:groups=addons.k8s.io,resources=dashboards/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups="",resources=namespaces,verbs=get;list;watch;create;update;delete;patch
+// +kubebuilder:rbac:groups="",resources=services;serviceaccounts;secrets;configmaps,verbs=get;list;watch;create;update;delete;patch
+// +kubebuilder:rbac:groups=rbac.authorization.k8s.io,resources=roles;rolebindings;clusterroles;clusterrolebindings,verbs=get;list;watch;create;update;delete;patch
+// +kubebuilder:rbac:groups=apps;extensions,resources=deployments,verbs=get;list;watch;create;update;delete;patch
+// +kubebuilder:rbac:groups=app.k8s.io,resources=applications,verbs=get;list;watch;create;update;delete;patch
+
+// +kubebuilder:rbac:groups="metrics.k8s.io",resources=pods;nodes,verbs=get;list;watch
+// +kubebuilder:rbac:groups="",resources=services,verbs=proxy
+// +kubebuilder:rbac:groups="",resources=services/proxy,verbs=get

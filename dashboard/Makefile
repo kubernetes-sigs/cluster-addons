@@ -1,4 +1,3 @@
-
 # Image URL to use all building/pushing image targets
 IMG ?= controller:latest
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
@@ -38,6 +37,11 @@ deploy: manifests
 	cd config/manager && kustomize edit set image controller=${IMG}
 	kustomize build config/default | kubectl apply -f -
 
+# Teardown controller in the configured Kubernetes cluster in ~/.kube/config
+# This command does things that can't always re-run so the exit codes are ignored
+teardown: manifests
+	kustomize build config/default | kubectl delete -f - || true
+
 # Generate manifests e.g. CRD, RBAC etc.
 manifests: controller-gen
 	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
@@ -50,12 +54,16 @@ fmt:
 vet:
 	go vet ./...
 
+# Run go mod vendor
+vendor:
+	go mod vendor
+
 # Generate code
 generate: controller-gen
 	$(CONTROLLER_GEN) object:headerFile=./hack/boilerplate.go.txt paths="./..."
 
 # Build the docker image
-docker-build: test
+docker-build: vendor test
 	docker build . -t ${IMG}
 
 # Push the docker image
