@@ -1,0 +1,7 @@
+domain: x-k8s.io
+repo: sigs.k8s.io/cluster-addons/localnodedns
+resources:
+- group: addons
+  kind: LocalNodeDNS
+  version: v1alpha1
+version: "2"
