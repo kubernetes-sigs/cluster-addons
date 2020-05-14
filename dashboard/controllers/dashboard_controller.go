@@ -90,8 +90,8 @@ func (r *DashboardReconciler) SetupWithManager(mgr ctrl.Manager) error {
 // for WithApplyPrune
 // +kubebuilder:rbac:groups=*,resources=*,verbs=list
 
-// +kubebuilder:rbac:groups=addons.k8s.io,resources=dashboards,verbs=get;list;watch;create;update;delete;patch
-// +kubebuilder:rbac:groups=addons.k8s.io,resources=dashboards/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=addons.x-k8s.io,resources=dashboards,verbs=get;list;watch;create;update;delete;patch
+// +kubebuilder:rbac:groups=addons.x-k8s.io,resources=dashboards/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups="",resources=namespaces,verbs=get;list;watch;create;update;delete;patch
 // +kubebuilder:rbac:groups="",resources=services;serviceaccounts;secrets;configmaps,verbs=get;list;watch;create;update;delete;patch
 // +kubebuilder:rbac:groups=rbac.authorization.k8s.io,resources=roles;rolebindings;clusterroles;clusterrolebindings,verbs=get;list;watch;create;update;delete;patch
