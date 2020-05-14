@@ -1,4 +1,3 @@
-
 # Image URL to use all building/pushing image targets
 IMG ?= controller:latest
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
@@ -50,16 +49,12 @@ fmt:
 vet:
 	go vet ./...
 
-# Run go mod vendor
-vendor:
-	go mod vendor
-
 # Generate code
 generate: controller-gen
 	$(CONTROLLER_GEN) object:headerFile=./hack/boilerplate.go.txt paths="./..."
 
 # Build the docker image
-docker-build: vendor test
+docker-build: test
 	docker build . -t ${IMG}
 
 # Push the docker image
