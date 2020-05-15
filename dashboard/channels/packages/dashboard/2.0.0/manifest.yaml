@@ -187,7 +187,7 @@ spec:
     spec:
       containers:
         - name: kubernetes-dashboard
-          image: kubernetesui/dashboard:v2.0.0-rc3
+          image: kubernetesui/dashboard:v2.0.0
           imagePullPolicy: Always
           ports:
             - containerPort: 8443
@@ -271,7 +271,7 @@ spec:
     spec:
       containers:
         - name: dashboard-metrics-scraper
-          image: kubernetesui/metrics-scraper:v1.0.3
+          image: kubernetesui/metrics-scraper:v1.0.4
           ports:
             - containerPort: 8000
               protocol: TCP
@@ -315,14 +315,14 @@ spec:
       Kubernetes Dashboard is a general purpose, web-based UI for Kubernetes clusters.
       It allows users to manage applications running in the cluster and troubleshoot them, as well as manage the cluster itself.
     icons:
-    - src: "https://github.com/kubernetes/kubernetes/raw/master/logo/logo.png"
-      type: "image/png"
+      - src: "https://github.com/kubernetes/kubernetes/raw/master/logo/logo.png"
+        type: "image/png"
     maintainers:
-    - name: Maintainer
-      url: https://github.com/kubernetes/dashboard
+      - name: Maintainer
+        url: https://github.com/kubernetes/dashboard
     keywords:
-    - "addon"
-    - "dashboard"
+      - "addon"
+      - "dashboard"
     links:
-    - description: Project Homepage
-      url: "https://github.com/kubernetes/dashboard"
+      - description: Project Homepage
+        url: "https://github.com/kubernetes/dashboard"
