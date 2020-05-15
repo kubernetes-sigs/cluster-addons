@@ -21,27 +21,20 @@ go mod vendor
 ```
 
 ## 3. Delete unnecessary test files
-Delete the test suites that are more checking that kubebuilder is working:
+Delete the test suites that are checking that kubebuilder is working:
 
 ```bash
 find . -name "*_test.go" -delete
 ```
 
-# Determine the a stable version and include its manifest:
+# Determine the stable version and include its manifest:
 
-Make a directory under `channels/packages/dashboard` with the version number. For the dashboard operator the stable
- version was `2.0.0`
+Make a directory under `channels/packages/dashboard` for a stable version of the dashboard -- then download the manifest for it:
 ```bash
-cd  channels/packages/dashboard
-mkdoir 2.0.0
+mkdir -p channels/packages/dashboard/2.0.0
+wget -O channels/packages/dashboard/2.0.0/manifest.yaml https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0/aio/deploy/recommended.yaml
 ```
 
-Download the manifest yaml
-```bash
-cd 2.0.0
-wget kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0/aio/deploy/recommended.yaml
-mv recommended.yaml manifest.yaml
-```
 
 Define the stable channel:
 
@@ -59,6 +52,13 @@ make install
 make run
 ```
 Logs from the operator appear in the console.
+
+Now in another terminal, create an instance of the Dashboard custom resource:
+```bash
+kubectl create ns kubernetes-dashboard
+kubectl -n kubernetes-dashboard apply -f config/samples/addons_v1alpha1_dashboard.yaml
+```
+You should see the operator respond and apply the resources from your package.
 
 You can now continue to build your operator by following the [kubebuilder-declarative-pattern](https://github.com/kubernetes-sigs/kubebuilder-declarative-pattern/tree/master/docs/addon/walkthrough#misc)
 
