@@ -4,7 +4,7 @@ metadata:
   name: coredns-operator
   namespace: kube-system
 spec:
-  version: 1.6.7
+  channel: stable
   dnsDomain: cluster.local
   dnsIP: 10.96.0.10
   corefile: |

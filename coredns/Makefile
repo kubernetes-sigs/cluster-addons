@@ -1,66 +1,85 @@
 
 # Image URL to use all building/pushing image targets
 IMG ?= ${USER}/coredns-operator:latest
+# Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
+CRD_OPTIONS ?= "crd:trivialVersions=true"
 
-all: test manager
+# Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
+ifeq (,$(shell go env GOBIN))
+GOBIN=$(shell go env GOPATH)/bin
+else
+GOBIN=$(shell go env GOBIN)
+endif
+
+all: manager
 
 # Run tests
 test: generate fmt vet manifests
-	go test ./pkg/... ./cmd/... -coverprofile cover.out
+	go test ./... -coverprofile cover.out
 
 # Build manager binary
 manager: generate fmt vet
-	go build -o bin/manager sigs.k8s.io/cluster-addons/coredns/cmd/manager
+	go build -o bin/manager main.go
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
-run: generate fmt vet
-	go run ./cmd/manager/main.go
+run: generate fmt vet manifests
+	go run ./main.go
 
 # Install CRDs into a cluster
 install: manifests
-	kubectl apply -f config/crds
+	kustomize build config/crd | kubectl apply -f -
+
+# Uninstall CRDs from a cluster
+uninstall: manifests
+	kustomize build config/crd | kubectl delete -f -
 
 # Deploy controller in the configured Kubernetes cluster in ~/.kube/config
 deploy: manifests
-	kubectl apply -f config/crds
-	cat k8s/manager.yaml | sed -e "s@IMAGE_NAME@${IMG}@g" | kubectl apply -f -
+	cd config/manager && kustomize edit set image controller=${IMG}
+	kustomize build config/default | kubectl apply -f -
+
+# Teardown controller in the configured Kubernetes cluster in ~/.kube/config
+# This command does things that can't always re-run so the exit codes are ignored
+teardown: manifests
+	kustomize build config/default | kubectl delete -f - || true
 
 # Generate manifests e.g. CRD, RBAC etc.
-manifests:
-	go run vendor/sigs.k8s.io/controller-tools/cmd/controller-gen/main.go all
+manifests: controller-gen
+	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 
 # Run go fmt against code
 fmt:
-	go fmt ./pkg/... ./cmd/...
+	go fmt ./...
 
 # Run go vet against code
 vet:
-	go vet ./pkg/... ./cmd/...
+	go vet ./...
 
 # Generate code
-generate:
-ifndef GOPATH
-	$(error GOPATH not defined, please define GOPATH. Run "go help gopath" to learn more about GOPATH)
-endif
-	go generate ./pkg/... ./cmd/...
+generate: controller-gen
+	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
 
 # Build the docker image
 docker-build: test
 	docker build . -t ${IMG}
-	@echo "updating kustomize image patch file for manager resource"
-	sed -i'' -e 's@image: .*@image: '"${IMG}"'@' ./config/default/manager_image_patch.yaml
 
 # Push the docker image
 docker-push:
 	docker push ${IMG}
 
-push-image:
-	mkdir -p .build
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o .build/manager ./cmd/manager
-	mkdir -p .build/bin
-	cd .build/bin; wget -N https://storage.googleapis.com/kubernetes-release/release/v1.14.0/bin/linux/amd64/kubectl
-	chmod +x .build/bin/kubectl
-	tar cvf .build/layer.tar -C .build manager bin/kubectl
-	tar rvf .build/layer.tar channels/
-	crane append --base gcr.io/distroless/static:latest --new_layer .build/layer.tar --new_tag ${IMG} --output .build/merged.tar
-	crane push .build/merged.tar ${IMG}
+# find or download controller-gen
+# download controller-gen if necessary
+controller-gen:
+ifeq (, $(shell which controller-gen))
+	@{ \
+	set -e ;\
+	CONTROLLER_GEN_TMP_DIR=$$(mktemp -d) ;\
+	cd $$CONTROLLER_GEN_TMP_DIR ;\
+	go mod init tmp ;\
+	go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.2.5 ;\
+	rm -rf $$CONTROLLER_GEN_TMP_DIR ;\
+	}
+CONTROLLER_GEN=$(GOBIN)/controller-gen
+else
+CONTROLLER_GEN=$(shell which controller-gen)
+endif

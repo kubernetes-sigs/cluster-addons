@@ -1,0 +1,87 @@
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  name: manager-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  - serviceaccounts
+  - services
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - endpoints
+  - namespaces
+  - nodes
+  - pods
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - '*'
+  resources:
+  - '*'
+  verbs:
+  - list
+- apiGroups:
+  - addons.x-k8s.io
+  resources:
+  - coredns
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - addons.x-k8s.io
+  resources:
+  - coredns/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - apps
+  - extensions
+  resources:
+  - deployments
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - clusterrolebindings
+  - clusterroles
+  - rolebindings
+  - roles
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch

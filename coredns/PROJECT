@@ -1,3 +1,7 @@
-version: "1"
-domain: k8s.io
+domain: x-k8s.io
 repo: sigs.k8s.io/cluster-addons/coredns
+resources:
+- group: addons
+  kind: CoreDNS
+  version: v1alpha1
+version: "2"
