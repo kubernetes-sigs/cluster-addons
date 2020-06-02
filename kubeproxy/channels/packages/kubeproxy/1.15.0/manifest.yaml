@@ -25,7 +25,7 @@ spec:
     - description: Project Homepage
       url: "https://github.com/kubernetes/kubernetes"
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: kube-proxy
@@ -60,7 +60,7 @@ spec:
         command:
         - /bin/sh
         - -c
-        - kube-proxy --resource-container="" --oom-score-adj=-998 {{params}} 
+        - kube-proxy --resource-container="" --oom-score-adj=-998 {{params}}
           #1>>/var/log/kube-proxy.log 2>&1
         securityContext:
           privileged: true
@@ -104,4 +104,3 @@ roleRef:
   kind: ClusterRole
   name: system:node-proxier
   apiGroup: rbac.authorization.k8s.io
-
