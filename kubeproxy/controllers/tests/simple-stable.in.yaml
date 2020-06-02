@@ -1,0 +1,8 @@
+apiVersion: addons.x-k8s.io/v1alpha1
+kind: KubeProxy
+metadata:
+  name: default
+  namespace: kube-system
+spec:
+  channel: stable
+  clusterCidr: 192.168.0.0/16
