@@ -38,6 +38,14 @@ spec:
               description: 'Channel specifies a channel that can be used to resolve
                 a specific addon, eg: stable It will be ignored if Version is specified'
               type: string
+            clusterIP:
+              type: string
+            dnsDomain:
+              description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+                Important: Run "make" to regenerate code after modifying this file'
+              type: string
+            dnsIP:
+              type: string
             patches:
               items:
                 type: object

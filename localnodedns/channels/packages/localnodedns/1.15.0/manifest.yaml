@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -188,3 +187,24 @@ spec:
           items:
             - key: Corefile
               path: Corefile.base
+---
+apiVersion: app.k8s.io/v1beta1
+kind: Application
+metadata:
+  name: node-local-dns
+  namespace: kube-system
+  annotations:
+spec:
+  descriptor:
+    type: "local-node-dns"
+    description: |
+      NodeLocal DNSCache improves Cluster DNS performance by running a dns caching agent on cluster nodes as a DaemonSet. In today’s architecture, Pods in ClusterFirst DNS mode reach out to a kube-dns serviceIP for DNS queries. This is translated to a kube-dns/CoreDNS endpoint via iptables rules added by kube-proxy. With this new architecture, Pods will reach out to the dns caching agent running on the same node, thereby avoiding iptables DNAT rules and connection tracking. The local caching agent will query kube-dns service for cache misses of cluster hostnames(cluster.local suffix by default).
+    icons:
+    - src: "https://github.com/kubernetes/kubernetes/raw/master/logo/logo.png"
+      type: "image/png"
+    keywords:
+    - "addon"
+    - "dns"
+    links:
+    - description: Project Homepage
+      url: "https://github.com/kubernetes/kubernetes"

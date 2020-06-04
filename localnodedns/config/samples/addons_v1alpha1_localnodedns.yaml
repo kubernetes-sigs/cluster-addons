@@ -2,6 +2,8 @@ apiVersion: addons.x-k8s.io/v1alpha1
 kind: LocalNodeDNS
 metadata:
   name: localnodedns-sample
+  namespace: kube-system
 spec:
-  # Add fields here
-  foo: bar
+  clusterIP: 10.96.0.10
+  dnsDomain: cluster.local
+  dnsIP: 169.254.20.10

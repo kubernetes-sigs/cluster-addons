@@ -15,6 +15,9 @@ type LocalNodeDNSSpec struct {
 
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+	DNSDomain string `json:"dnsDomain,omitempty"`
+	DNSIP     string `json:"dnsIP,omitempty"`
+	ClusterIP string `json:"clusterIP,omitempty"`
 }
 
 // LocalNodeDNSStatus defines the observed state of LocalNodeDNS

@@ -1,6 +1,9 @@
 package controllers
 
 import (
+	"context"
+	"strings"
+
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -41,12 +44,13 @@ func (r *LocalNodeDNSReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	watchLabels := declarative.SourceLabel(mgr.GetScheme())
 
 	if err := r.Reconciler.Init(mgr, &api.LocalNodeDNS{},
+		declarative.WithRawManifestOperation(replaceVariables),
 		declarative.WithObjectTransform(declarative.AddLabels(labels)),
 		declarative.WithOwner(declarative.SourceAsOwner),
 		declarative.WithLabels(watchLabels),
 		declarative.WithStatus(status.NewBasic(mgr.GetClient())),
-		// TODO: add an application to your manifest:  declarative.WithObjectTransform(addon.TransformApplicationFromStatus),
-		// TODO: add an application to your manifest:  declarative.WithManagedApplication(watchLabels),
+		declarative.WithObjectTransform(addon.TransformApplicationFromStatus),
+		declarative.WithManagedApplication(watchLabels),
 		declarative.WithObjectTransform(addon.ApplyPatches),
 	); err != nil {
 		return err
@@ -70,4 +74,22 @@ func (r *LocalNodeDNSReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	}
 
 	return nil
+}
+
+func replaceVariables(ctx context.Context, object declarative.DeclarativeObject, s string) (string, error) {
+	o := object.(*api.LocalNodeDNS)
+
+	if o.Spec.DNSDomain != "" {
+		s = strings.Replace(s, "__PILLAR__DNS__DOMAIN__", o.Spec.DNSDomain, -1)
+	}
+
+	if o.Spec.DNSIP != "" {
+		s = strings.Replace(s, "__PILLAR__LOCAL__DNS__", o.Spec.DNSIP, -1)
+	}
+
+	if o.Spec.ClusterIP != "" {
+		s = strings.Replace(s, "__PILLAR__DNS__SERVER__", o.Spec.ClusterIP, -1)
+	}
+
+	return s, nil
 }
