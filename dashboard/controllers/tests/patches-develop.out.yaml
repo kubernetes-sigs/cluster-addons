@@ -185,7 +185,7 @@ spec:
         k8s-app: dashboard-metrics-scraper
     spec:
       containers:
-      - image: kubernetesui/metrics-scraper:v1.0.3
+      - image: kubernetesui/metrics-scraper:v1.0.4
         livenessProbe:
           httpGet:
             path: /
@@ -240,7 +240,7 @@ spec:
       - args:
         - --auto-generate-certificates
         - --namespace=kubernetes-dashboard
-        image: kubernetesui/dashboard:v2.0.0-rc3
+        image: kubernetesui/dashboard:v2.0.0
         imagePullPolicy: Always
         livenessProbe:
           httpGet:
