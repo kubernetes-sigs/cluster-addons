@@ -79,17 +79,21 @@ func (r *LocalNodeDNSReconciler) SetupWithManager(mgr ctrl.Manager) error {
 func replaceVariables(ctx context.Context, object declarative.DeclarativeObject, s string) (string, error) {
 	o := object.(*api.LocalNodeDNS)
 
-	if o.Spec.DNSDomain != "" {
-		s = strings.Replace(s, "__PILLAR__DNS__DOMAIN__", o.Spec.DNSDomain, -1)
+	if o.Spec.DNSDomain == "" {
+		o.Spec.DNSDomain = "cluster.local"
 	}
 
-	if o.Spec.DNSIP != "" {
-		s = strings.Replace(s, "__PILLAR__LOCAL__DNS__", o.Spec.DNSIP, -1)
+	if o.Spec.DNSIP == "" {
+		o.Spec.DNSIP = "169.254.20.10"
 	}
 
-	if o.Spec.ClusterIP != "" {
-		s = strings.Replace(s, "__PILLAR__DNS__SERVER__", o.Spec.ClusterIP, -1)
+	if o.Spec.ClusterIP == "" {
+		o.Spec.ClusterIP = "10.96.0.10"
 	}
+
+	s = strings.Replace(s, "__PILLAR__LOCAL__DNS__", o.Spec.DNSIP, -1)
+	s = strings.Replace(s, "__PILLAR__DNS__SERVER__", o.Spec.ClusterIP, -1)
+	s = strings.Replace(s, "__PILLAR__DNS__DOMAIN__", o.Spec.DNSDomain, -1)
 
 	return s, nil
 }

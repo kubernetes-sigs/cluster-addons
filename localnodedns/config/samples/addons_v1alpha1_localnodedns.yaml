@@ -4,6 +4,4 @@ metadata:
   name: localnodedns-sample
   namespace: kube-system
 spec:
-  clusterIP: 10.96.0.10
-  dnsDomain: cluster.local
-  dnsIP: 169.254.20.10
+  channel: stable
