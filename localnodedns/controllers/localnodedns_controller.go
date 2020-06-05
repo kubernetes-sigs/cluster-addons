@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"sigs.k8s.io/controller-runtime/pkg/controller"
@@ -29,30 +30,35 @@ type LocalNodeDNSReconciler struct {
 	Scheme *runtime.Scheme
 
 	declarative.Reconciler
+	watchLabels declarative.LabelMaker
 }
 
-// +kubebuilder:rbac:groups=addons.x-k8s.io,resources=localnodedns,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=addons.x-k8s.io,resources=localnodedns/status,verbs=get;update;patch
-
-func (r *LocalNodeDNSReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *LocalNodeDNSReconciler) setupReconciler(mgr ctrl.Manager) error {
 	addon.Init()
 
 	labels := map[string]string{
 		"k8s-app": "localnodedns",
 	}
 
-	watchLabels := declarative.SourceLabel(mgr.GetScheme())
+	r.watchLabels = declarative.SourceLabel(mgr.GetScheme())
 
-	if err := r.Reconciler.Init(mgr, &api.LocalNodeDNS{},
-		declarative.WithRawManifestOperation(replaceVariables),
+	return r.Reconciler.Init(mgr, &api.LocalNodeDNS{},
+		declarative.WithRawManifestOperation(replaceVariables(mgr)),
 		declarative.WithObjectTransform(declarative.AddLabels(labels)),
 		declarative.WithOwner(declarative.SourceAsOwner),
-		declarative.WithLabels(watchLabels),
+		declarative.WithLabels(r.watchLabels),
 		declarative.WithStatus(status.NewBasic(mgr.GetClient())),
 		declarative.WithObjectTransform(addon.TransformApplicationFromStatus),
-		declarative.WithManagedApplication(watchLabels),
+		declarative.WithManagedApplication(r.watchLabels),
 		declarative.WithObjectTransform(addon.ApplyPatches),
-	); err != nil {
+	)
+}
+
+// +kubebuilder:rbac:groups=addons.x-k8s.io,resources=localnodedns,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=addons.x-k8s.io,resources=localnodedns/status,verbs=get;update;patch
+
+func (r *LocalNodeDNSReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	if err := r.setupReconciler(mgr); err != nil {
 		return err
 	}
 
@@ -68,7 +74,7 @@ func (r *LocalNodeDNSReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	}
 
 	// Watch for changes to deployed objects
-	_, err = declarative.WatchAll(mgr.GetConfig(), c, r, watchLabels)
+	_, err = declarative.WatchAll(mgr.GetConfig(), c, r, r.watchLabels)
 	if err != nil {
 		return err
 	}
@@ -76,24 +82,36 @@ func (r *LocalNodeDNSReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return nil
 }
 
-func replaceVariables(ctx context.Context, object declarative.DeclarativeObject, s string) (string, error) {
-	o := object.(*api.LocalNodeDNS)
+func replaceVariables(mgr ctrl.Manager) declarative.ManifestOperation {
+	return func(ctx context.Context, object declarative.DeclarativeObject, s string) (string, error) {
+		o := object.(*api.LocalNodeDNS)
+		kubeProxyMode, err := findKubeProxyMode(ctx, mgr.GetClient())
+		if err != nil {
+			fmt.Println("Error determining kube-proxy mode: Defaulting to iptables")
+		}
 
-	if o.Spec.DNSDomain == "" {
-		o.Spec.DNSDomain = "cluster.local"
+		if o.Spec.DNSDomain == "" {
+			o.Spec.DNSDomain = "cluster.local"
+		}
+
+		if o.Spec.DNSIP == "" {
+			o.Spec.DNSIP = "169.254.20.10"
+		}
+
+		if o.Spec.ClusterIP == "" {
+			o.Spec.ClusterIP = "10.96.0.10"
+		}
+
+		s = strings.Replace(s, "__PILLAR__LOCAL__DNS__", o.Spec.DNSIP, -1)
+		s = strings.Replace(s, "__PILLAR__DNS__DOMAIN__", o.Spec.DNSDomain, -1)
+
+		if kubeProxyMode == "ipvs" {
+			s = strings.Replace(s, "__PILLAR__DNS__SERVER__", "", -1)
+			s = strings.Replace(s, "__PILLAR__CLUSTER__DNS__", o.Spec.ClusterIP, -1)
+		} else {
+			s = strings.Replace(s, "__PILLAR__DNS__SERVER__", o.Spec.ClusterIP, -1)
+		}
+
+		return s, nil
 	}
-
-	if o.Spec.DNSIP == "" {
-		o.Spec.DNSIP = "169.254.20.10"
-	}
-
-	if o.Spec.ClusterIP == "" {
-		o.Spec.ClusterIP = "10.96.0.10"
-	}
-
-	s = strings.Replace(s, "__PILLAR__LOCAL__DNS__", o.Spec.DNSIP, -1)
-	s = strings.Replace(s, "__PILLAR__DNS__SERVER__", o.Spec.ClusterIP, -1)
-	s = strings.Replace(s, "__PILLAR__DNS__DOMAIN__", o.Spec.DNSDomain, -1)
-
-	return s, nil
 }
