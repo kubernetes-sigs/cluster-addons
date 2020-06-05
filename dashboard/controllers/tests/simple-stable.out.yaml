@@ -5,7 +5,66 @@ metadata:
     addons.k8s.io/dashboard: dashboard-sample
     k8s-app: kubernetes-dashboard
   name: kubernetes-dashboard
-  namespace: kube-system
+  namespace: kubernetes-dashboard
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    addons.k8s.io/dashboard: dashboard-sample
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard
+rules:
+- apiGroups:
+  - metrics.k8s.io
+  resources:
+  - pods
+  - nodes
+  verbs:
+  - get
+  - list
+  - watch
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    addons.k8s.io/dashboard: dashboard-sample
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kubernetes-dashboard
+subjects:
+- kind: ServiceAccount
+  name: kubernetes-dashboard
+  namespace: kubernetes-dashboard
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    addons.k8s.io/dashboard: dashboard-sample
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard-settings
+  namespace: kubernetes-dashboard
+
+---
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    addons.k8s.io/dashboard: dashboard-sample
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard
 
 ---
 
@@ -16,7 +75,33 @@ metadata:
     addons.k8s.io/dashboard: dashboard-sample
     k8s-app: kubernetes-dashboard
   name: kubernetes-dashboard-certs
-  namespace: kube-system
+  namespace: kubernetes-dashboard
+type: Opaque
+
+---
+
+apiVersion: v1
+data:
+  csrf: ""
+kind: Secret
+metadata:
+  labels:
+    addons.k8s.io/dashboard: dashboard-sample
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard-csrf
+  namespace: kubernetes-dashboard
+type: Opaque
+
+---
+
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    addons.k8s.io/dashboard: dashboard-sample
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard-key-holder
+  namespace: kubernetes-dashboard
 type: Opaque
 
 ---
@@ -34,8 +119,16 @@ spec:
   componentGroupKinds:
   - group: app.k8s.io
     kind: Application
+  - group: rbac.authorization.k8s.io
+    kind: ClusterRole
+  - group: rbac.authorization.k8s.io
+    kind: ClusterRoleBinding
+  - group: ""
+    kind: ConfigMap
   - group: apps
     kind: Deployment
+  - group: ""
+    kind: Namespace
   - group: rbac.authorization.k8s.io
     kind: Role
   - group: rbac.authorization.k8s.io
@@ -76,8 +169,62 @@ metadata:
   labels:
     addons.k8s.io/dashboard: dashboard-sample
     k8s-app: kubernetes-dashboard
+  name: dashboard-metrics-scraper
+  namespace: kubernetes-dashboard
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      k8s-app: dashboard-metrics-scraper
+  template:
+    metadata:
+      annotations:
+        seccomp.security.alpha.kubernetes.io/pod: runtime/default
+      labels:
+        k8s-app: dashboard-metrics-scraper
+    spec:
+      containers:
+      - image: kubernetesui/metrics-scraper:v1.0.4
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8000
+            scheme: HTTP
+          initialDelaySeconds: 30
+          timeoutSeconds: 30
+        name: dashboard-metrics-scraper
+        ports:
+        - containerPort: 8000
+          protocol: TCP
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsGroup: 2001
+          runAsUser: 1001
+        volumeMounts:
+        - mountPath: /tmp
+          name: tmp-volume
+      nodeSelector:
+        kubernetes.io/os: linux
+      serviceAccountName: kubernetes-dashboard
+      tolerations:
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/master
+      volumes:
+      - emptyDir: {}
+        name: tmp-volume
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    addons.k8s.io/dashboard: dashboard-sample
+    k8s-app: kubernetes-dashboard
   name: kubernetes-dashboard
-  namespace: kube-system
+  namespace: kubernetes-dashboard
 spec:
   replicas: 1
   revisionHistoryLimit: 10
@@ -92,7 +239,9 @@ spec:
       containers:
       - args:
         - --auto-generate-certificates
-        image: k8s.gcr.io/kubernetes-dashboard-amd64:v1.8.3
+        - --namespace=kubernetes-dashboard
+        image: kubernetesui/dashboard:v2.0.0
+        imagePullPolicy: Always
         livenessProbe:
           httpGet:
             path: /
@@ -104,11 +253,18 @@ spec:
         ports:
         - containerPort: 8443
           protocol: TCP
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsGroup: 2001
+          runAsUser: 1001
         volumeMounts:
         - mountPath: /certs
           name: kubernetes-dashboard-certs
         - mountPath: /tmp
           name: tmp-volume
+      nodeSelector:
+        kubernetes.io/os: linux
       serviceAccountName: kubernetes-dashboard
       tolerations:
       - effect: NoSchedule
@@ -128,26 +284,15 @@ metadata:
   labels:
     addons.k8s.io/dashboard: dashboard-sample
     k8s-app: kubernetes-dashboard
-  name: kubernetes-dashboard-minimal
-  namespace: kube-system
+  name: kubernetes-dashboard
+  namespace: kubernetes-dashboard
 rules:
-- apiGroups:
-  - ""
-  resources:
-  - secrets
-  verbs:
-  - create
-- apiGroups:
-  - ""
-  resources:
-  - configmaps
-  verbs:
-  - create
 - apiGroups:
   - ""
   resourceNames:
   - kubernetes-dashboard-key-holder
   - kubernetes-dashboard-certs
+  - kubernetes-dashboard-csrf
   resources:
   - secrets
   verbs:
@@ -167,6 +312,7 @@ rules:
   - ""
   resourceNames:
   - heapster
+  - dashboard-metrics-scraper
   resources:
   - services
   verbs:
@@ -177,6 +323,8 @@ rules:
   - heapster
   - 'http:heapster:'
   - 'https:heapster:'
+  - dashboard-metrics-scraper
+  - http:dashboard-metrics-scraper
   resources:
   - services/proxy
   verbs:
@@ -190,16 +338,33 @@ metadata:
   labels:
     addons.k8s.io/dashboard: dashboard-sample
     k8s-app: kubernetes-dashboard
-  name: kubernetes-dashboard-minimal
-  namespace: kube-system
+  name: kubernetes-dashboard
+  namespace: kubernetes-dashboard
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: kubernetes-dashboard-minimal
+  name: kubernetes-dashboard
 subjects:
 - kind: ServiceAccount
   name: kubernetes-dashboard
-  namespace: kube-system
+  namespace: kubernetes-dashboard
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    addons.k8s.io/dashboard: dashboard-sample
+    k8s-app: kubernetes-dashboard
+  name: dashboard-metrics-scraper
+  namespace: kubernetes-dashboard
+spec:
+  ports:
+  - port: 8000
+    targetPort: 8000
+  selector:
+    k8s-app: dashboard-metrics-scraper
 
 ---
 
@@ -210,7 +375,7 @@ metadata:
     addons.k8s.io/dashboard: dashboard-sample
     k8s-app: kubernetes-dashboard
   name: kubernetes-dashboard
-  namespace: kube-system
+  namespace: kubernetes-dashboard
 spec:
   ports:
   - port: 443
