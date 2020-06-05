@@ -33,6 +33,28 @@ type KubeProxyReconciler struct {
 	Log logr.Logger
 
 	declarative.Reconciler
+	watchLabels declarative.LabelMaker
+}
+
+func (r *KubeProxyReconciler) setupReconciler(mgr ctrl.Manager) error {
+	labels := map[string]string{
+		"k8s-app": "kubeproxy",
+	}
+
+	r.watchLabels = declarative.SourceLabel(mgr.GetScheme())
+
+	return r.Reconciler.Init(mgr, &api.KubeProxy{},
+		declarative.WithRawManifestOperation(injectFlags),
+		declarative.WithRawManifestOperation(replaceNamespacePattern("{{.Namespace}}")),
+		declarative.WithObjectTransform(declarative.AddLabels(labels)),
+		declarative.WithObjectTransform(OverrideApiserver),
+		declarative.WithOwner(declarative.SourceAsOwner),
+		declarative.WithLabels(r.watchLabels),
+		declarative.WithStatus(status.NewBasic(mgr.GetClient())),
+		declarative.WithObjectTransform(addon.TransformApplicationFromStatus),
+		declarative.WithManagedApplication(r.watchLabels),
+		declarative.WithObjectTransform(addon.ApplyPatches),
+	)
 }
 
 // +kubebuilder:rbac:groups=addons.x-k8s.io,resources=kubeproxies,verbs=get;list;watch;create;update;patch;delete
@@ -41,24 +63,7 @@ type KubeProxyReconciler struct {
 func (r *KubeProxyReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	addon.Init()
 
-	labels := map[string]string{
-		"k8s-app": "kubeproxy",
-	}
-
-	watchLabels := declarative.SourceLabel(mgr.GetScheme())
-
-	if err := r.Reconciler.Init(mgr, &api.KubeProxy{},
-		declarative.WithRawManifestOperation(injectFlags),
-		declarative.WithRawManifestOperation(replaceNamespacePattern("{{.Namespace}}")),
-		declarative.WithObjectTransform(declarative.AddLabels(labels)),
-		declarative.WithObjectTransform(OverrideApiserver),
-		declarative.WithOwner(declarative.SourceAsOwner),
-		declarative.WithLabels(watchLabels),
-		declarative.WithStatus(status.NewBasic(mgr.GetClient())),
-		declarative.WithObjectTransform(addon.TransformApplicationFromStatus),
-		declarative.WithManagedApplication(watchLabels),
-		declarative.WithObjectTransform(addon.ApplyPatches),
-	); err != nil {
+	if err := r.setupReconciler(mgr); err != nil {
 		return err
 	}
 
@@ -74,7 +79,7 @@ func (r *KubeProxyReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	}
 
 	// Watch for changes to deployed objects
-	_, err = declarative.WatchAll(mgr.GetConfig(), c, r, watchLabels)
+	_, err = declarative.WatchAll(mgr.GetConfig(), c, r, r.watchLabels)
 	if err != nil {
 		return err
 	}
