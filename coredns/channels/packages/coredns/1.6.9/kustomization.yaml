@@ -12,7 +12,9 @@ resources:
 configMapGenerator:
   - name: coredns
     namespace: kube-system
-    {{ .Corefile }}
+    literals:
+      - |
+        Corefile={{ .Corefile }}
 
 
 generatorOptions:

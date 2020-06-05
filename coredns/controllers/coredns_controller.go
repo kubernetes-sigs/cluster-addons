@@ -102,6 +102,8 @@ func (r *CoreDNSReconciler) setupReconciler(mgr ctrl.Manager) error {
 			}
 			corefile = string(b)
 		}
+
+		corefile = strings.Replace(corefile, "{{ .DNSDomain }}", o.Spec.DNSDomain, -1)
 		o.Spec.Corefile = corefile
 
 		s = strings.Replace(s, "{{ .Corefile }}", prepCorefileFormat(o.Spec.Corefile, 8), -1)
