@@ -6,3 +6,6 @@ images:
 - name: controller
   newName: controller
   newTag: latest
+patchesStrategicMerge:
+- patches/apiserver_endpoint.patch.yaml
+- patches/tolerations_controlplane.patch.yaml

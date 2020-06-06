@@ -31,11 +31,6 @@ spec:
         image: controller:latest
         imagePullPolicy: IfNotPresent
         name: manager
-        env:
-          - name: KUBERNETES_SERVICE_HOST
-            value: "172.17.0.2"
-          - name: KUBERNETES_SERVICE_PORT
-            value: "6443"
         resources:
           limits:
             cpu: 100m
@@ -44,10 +39,3 @@ spec:
             cpu: 100m
             memory: 20Mi
       terminationGracePeriodSeconds: 10
-      tolerations:
-      - key: "node.kubernetes.io/not-ready"
-        operator: "Exists"
-        effect: "NoSchedule"
-      - key: "node-role.kubernetes.io/master"
-        operator: "Exists"
-        effect: "NoSchedule"
