@@ -62,8 +62,8 @@ func (r *DashboardReconciler) setupReconciler(mgr ctrl.Manager) error {
 	)
 }
 
-// +kubebuilder:rbac:groups=addons.k8s.io,resources=dashboards,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=addons.k8s.io,resources=dashboards/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=addons.x-k8s.io,resources=dashboards,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=addons.x-k8s.io,resources=dashboards/status,verbs=get;update;patch
 
 func (r *DashboardReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	if err := r.setupReconciler(mgr); err != nil {

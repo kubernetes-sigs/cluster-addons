@@ -15,7 +15,7 @@ limitations under the License.
 
 // Package v1alpha1 contains API Schema definitions for the addons v1alpha1 API group
 // +kubebuilder:object:generate=true
-// +groupName=addons.k8s.io
+// +groupName=addons.x-k8s.io
 package v1alpha1
 
 import (
@@ -25,7 +25,7 @@ import (
 
 var (
 	// GroupVersion is group version used to register these objects
-	GroupVersion = schema.GroupVersion{Group: "addons.k8s.io", Version: "v1alpha1"}
+	GroupVersion = schema.GroupVersion{Group: "addons.x-k8s.io", Version: "v1alpha1"}
 
 	// SchemeBuilder is used to add go types to the GroupVersionKind scheme
 	SchemeBuilder = &scheme.Builder{GroupVersion: GroupVersion}

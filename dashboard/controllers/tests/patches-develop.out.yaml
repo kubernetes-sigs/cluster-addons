@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   labels:
-    addons.k8s.io/dashboard: dashboard-sample
+    addons.x-k8s.io/dashboard: dashboard-sample
     k8s-app: kubernetes-dashboard
   name: kubernetes-dashboard
   namespace: kubernetes-dashboard
@@ -13,7 +13,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   labels:
-    addons.k8s.io/dashboard: dashboard-sample
+    addons.x-k8s.io/dashboard: dashboard-sample
     k8s-app: kubernetes-dashboard
   name: kubernetes-dashboard
 rules:
@@ -33,7 +33,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   labels:
-    addons.k8s.io/dashboard: dashboard-sample
+    addons.x-k8s.io/dashboard: dashboard-sample
     k8s-app: kubernetes-dashboard
   name: kubernetes-dashboard
 roleRef:
@@ -51,7 +51,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   labels:
-    addons.k8s.io/dashboard: dashboard-sample
+    addons.x-k8s.io/dashboard: dashboard-sample
     k8s-app: kubernetes-dashboard
   name: kubernetes-dashboard-settings
   namespace: kubernetes-dashboard
@@ -62,7 +62,7 @@ apiVersion: v1
 kind: Namespace
 metadata:
   labels:
-    addons.k8s.io/dashboard: dashboard-sample
+    addons.x-k8s.io/dashboard: dashboard-sample
     k8s-app: kubernetes-dashboard
   name: kubernetes-dashboard
 
@@ -72,7 +72,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   labels:
-    addons.k8s.io/dashboard: dashboard-sample
+    addons.x-k8s.io/dashboard: dashboard-sample
     k8s-app: kubernetes-dashboard
   name: kubernetes-dashboard-certs
   namespace: kubernetes-dashboard
@@ -86,7 +86,7 @@ data:
 kind: Secret
 metadata:
   labels:
-    addons.k8s.io/dashboard: dashboard-sample
+    addons.x-k8s.io/dashboard: dashboard-sample
     k8s-app: kubernetes-dashboard
   name: kubernetes-dashboard-csrf
   namespace: kubernetes-dashboard
@@ -98,7 +98,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   labels:
-    addons.k8s.io/dashboard: dashboard-sample
+    addons.x-k8s.io/dashboard: dashboard-sample
     k8s-app: kubernetes-dashboard
   name: kubernetes-dashboard-key-holder
   namespace: kubernetes-dashboard
@@ -110,7 +110,7 @@ apiVersion: app.k8s.io/v1beta1
 kind: Application
 metadata:
   labels:
-    addons.k8s.io/dashboard: dashboard-sample
+    addons.x-k8s.io/dashboard: dashboard-sample
     k8s-app: kubernetes-dashboard
   name: kubernetes-dashboard
   namespace: kube-system
@@ -159,7 +159,7 @@ spec:
     version: ""
   selector:
     matchLabels:
-      addons.k8s.io/dashboard: dashboard-sample
+      addons.x-k8s.io/dashboard: dashboard-sample
 
 ---
 
@@ -167,7 +167,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    addons.k8s.io/dashboard: dashboard-sample
+    addons.x-k8s.io/dashboard: dashboard-sample
     k8s-app: kubernetes-dashboard
   name: dashboard-metrics-scraper
   namespace: kubernetes-dashboard
@@ -221,7 +221,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    addons.k8s.io/dashboard: dashboard-sample
+    addons.x-k8s.io/dashboard: dashboard-sample
     k8s-app: kubernetes-dashboard
   name: kubernetes-dashboard
   namespace: kubernetes-dashboard
@@ -282,7 +282,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   labels:
-    addons.k8s.io/dashboard: dashboard-sample
+    addons.x-k8s.io/dashboard: dashboard-sample
     k8s-app: kubernetes-dashboard
   name: kubernetes-dashboard
   namespace: kubernetes-dashboard
@@ -336,7 +336,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   labels:
-    addons.k8s.io/dashboard: dashboard-sample
+    addons.x-k8s.io/dashboard: dashboard-sample
     k8s-app: kubernetes-dashboard
   name: kubernetes-dashboard
   namespace: kubernetes-dashboard
@@ -355,7 +355,7 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    addons.k8s.io/dashboard: dashboard-sample
+    addons.x-k8s.io/dashboard: dashboard-sample
     k8s-app: kubernetes-dashboard
   name: dashboard-metrics-scraper
   namespace: kubernetes-dashboard
@@ -372,7 +372,7 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    addons.k8s.io/dashboard: dashboard-sample
+    addons.x-k8s.io/dashboard: dashboard-sample
     k8s-app: kubernetes-dashboard
   name: kubernetes-dashboard
   namespace: kubernetes-dashboard
