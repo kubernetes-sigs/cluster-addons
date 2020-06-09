@@ -4,11 +4,11 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.2.4
+    controller-gen.kubebuilder.io/version: v0.3.0
   creationTimestamp: null
-  name: dashboards.addons.k8s.io
+  name: dashboards.addons.x-k8s.io
 spec:
-  group: addons.k8s.io
+  group: addons.x-k8s.io
   names:
     kind: Dashboard
     listKind: DashboardList

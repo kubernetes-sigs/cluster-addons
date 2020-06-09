@@ -1,4 +1,4 @@
-domain: k8s.io
+domain: x-k8s.io
 repo: sigs.k8s.io/cluster-addons/dashboard
 resources:
 - group: addons

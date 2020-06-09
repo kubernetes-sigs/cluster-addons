@@ -5,7 +5,7 @@ metadata:
   name: dashboard-editor-role
 rules:
 - apiGroups:
-  - addons.k8s.io
+  - addons.x-k8s.io
   resources:
   - dashboards
   verbs:
@@ -17,7 +17,7 @@ rules:
   - update
   - watch
 - apiGroups:
-  - addons.k8s.io
+  - addons.x-k8s.io
   resources:
   - dashboards/status
   verbs:
