@@ -22,12 +22,14 @@ spec:
       labels:
         control-plane: controller-manager
     spec:
+      hostNetwork: true
       containers:
       - command:
         - /manager
         args:
         - --enable-leader-election
         image: controller:latest
+        imagePullPolicy: IfNotPresent
         name: manager
         resources:
           limits:

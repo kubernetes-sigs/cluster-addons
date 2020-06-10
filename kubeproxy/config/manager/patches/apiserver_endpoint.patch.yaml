@@ -1,0 +1,15 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: controller-manager
+  namespace: system
+spec:
+  template:
+    spec:
+      containers:
+      - name: manager
+        env:
+          - name: KUBERNETES_SERVICE_HOST
+            value: "172.17.0.2"
+          - name: KUBERNETES_SERVICE_PORT
+            value: "6443"
