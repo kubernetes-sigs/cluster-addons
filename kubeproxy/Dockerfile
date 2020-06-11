@@ -4,7 +4,7 @@ RUN apt-get install curl -y
 RUN curl -fsSL https://dl.k8s.io/release/v1.17.4/bin/linux/amd64/kubectl > /usr/bin/kubectl
 RUN chmod a+rx /usr/bin/kubectl
 # Build the manager binary
-FROM golang:1.12.5 as builder
+FROM golang:1.13 as builder
 
 WORKDIR /workspace
 # Copy the Go Modules manifests
