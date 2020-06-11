@@ -647,6 +647,8 @@ sigs.k8s.io/controller-runtime v0.6.0 h1:Fzna3DY7c4BIP6KwfSlrfnj20DJ+SeMBK8HSFvO
 sigs.k8s.io/controller-runtime v0.6.0/go.mod h1:CpYf5pdNY/B352A1TFLAS2JVSlnGQ5O2cftPHndTroo=
 sigs.k8s.io/kubebuilder-declarative-pattern v0.0.0-20200512162422-ce639cbf6d4c h1:B/vr7eOy+CMryi7KRs7pZSF/Q+TO10Y7qOCw8co6nzY=
 sigs.k8s.io/kubebuilder-declarative-pattern v0.0.0-20200512162422-ce639cbf6d4c/go.mod h1:5DqvmcipwvJ1lp2WY9qVE6hCJVC8NFFWculXqEiwkJE=
+sigs.k8s.io/kubebuilder-declarative-pattern v0.0.0-20200605153943-bafc349a4a84 h1:5DdMFmySgc0YyaCKu1YuctVv3GfYQJRgwLUiM7KwLr0=
+sigs.k8s.io/kubebuilder-declarative-pattern v0.0.0-20200605153943-bafc349a4a84/go.mod h1:5DqvmcipwvJ1lp2WY9qVE6hCJVC8NFFWculXqEiwkJE=
 sigs.k8s.io/kustomize/api v0.3.2 h1:64gvYVAvqe2fNfcTevtXh/GmLwVwHIcJ2Z5HBMfjncs=
 sigs.k8s.io/kustomize/api v0.3.2/go.mod h1:A+ATnlHqzictQfQC1q3KB/T6MSr0UWQsrrLxMWkge2E=
 sigs.k8s.io/structured-merge-diff v0.0.0-20190525122527-15d366b2352e/go.mod h1:wWxsB5ozmmv/SG7nM11ayaAW51xMvak/t1r0CSlcokI=

@@ -18,6 +18,7 @@ package main
 import (
 	"flag"
 	"os"
+	"sigs.k8s.io/kubebuilder-declarative-pattern/pkg/patterns/addon"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -26,7 +27,6 @@ import (
 	"sigs.k8s.io/cluster-addons/localnodedns/controllers"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
-	"sigs.k8s.io/kubebuilder-declarative-pattern/pkg/patterns/addon"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -43,7 +43,6 @@ func init() {
 }
 
 func main() {
-	addon.Init()
 	var metricsAddr string
 	var enableLeaderElection bool
 	flag.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
@@ -54,11 +53,13 @@ func main() {
 	ctrl.SetLogger(zap.New(func(o *zap.Options) {
 		o.Development = true
 	}))
+	addon.Init()
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:             scheme,
 		MetricsBindAddress: metricsAddr,
 		LeaderElection:     enableLeaderElection,
+		LeaderElectionID:   "nodelocaldns-operator",
 		Port:               9443,
 	})
 	if err != nil {
