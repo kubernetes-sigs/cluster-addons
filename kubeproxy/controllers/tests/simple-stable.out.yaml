@@ -42,7 +42,7 @@ spec:
     kind: Application
   - group: rbac.authorization.k8s.io
     kind: ClusterRoleBinding
-  - group: extensions
+  - group: apps
     kind: DaemonSet
   - group: ""
     kind: ServiceAccount
@@ -72,7 +72,7 @@ spec:
 
 ---
 
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   labels:
@@ -99,9 +99,9 @@ spec:
           --cluster-cidr=192.168.0.0/16
         env:
         - name: KUBERNETES_SERVICE_HOST
-          value: 127.0.0.1
+          value: kubernetes-master
         - name: KUBERNETES_SERVICE_PORT
-          value: "49352"
+          value: "443"
         image: k8s.gcr.io/kube-proxy:v1.15.0
         name: kube-proxy
         resources:
