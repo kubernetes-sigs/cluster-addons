@@ -20,11 +20,11 @@ kubeproxy-operator is a Kubernetes operator for managing kubeproxy.
    export KUBECONFIG=$(kinder get kubeconfig-path)
    ```
 
-   You might have set the server ip in the KUBECONFIG to use localhost to reach the cluster, `insecure-skip-tls-verify` to true, and delete the ca certificate. To find the port, run `docker ps | grep kind` and check the port
+   You might have set the server ip in the KUBECONFIG to use localhost to reach the cluster, you will have to set the server to `localhost`. To find the port, run `docker inspect kind-control-plane-1 -f '{{(index (index .NetworkSettings.Ports "6443/tcp") 0).HostPort}}'` and check the port
 
+   Edit your KUBECONFIG `vi $KUBECONFIG`
    ```yaml
-   insecure-skip-tls-verify: true
-   server: https://127.0.0.1:<port>
+   server: https://localhost:<port>
    ```
 
 2. Set the Kubernetes Service host and port in manager.yaml ssh into the node and get the host and port. The command below should give the host.
@@ -33,13 +33,13 @@ kubeproxy-operator is a Kubernetes operator for managing kubeproxy.
    docker inspect kind-control-plane-1 | grep IPAddress
    ```
 
-   Replace it in the `manager.yaml`
+   Edit `config/manager/patches/apiserver_endpoint.path.yaml`
 
    ```yaml
    - name: KUBERNETES_SERVICE_HOST
-     value: "172.17.0.2"
+     value: <your-kubernetes-ip>
    - name: KUBERNETES_SERVICE_PORT
-     value: "6443"
+     value: <your-kubernetes-port>
    ```
 
 
