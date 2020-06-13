@@ -48,7 +48,7 @@ rules:
 ---
 
 apiVersion: v1
-kind: Policy
+kind: Secret
 metadata:
   labels:
     k8s-app: kubernetes-dashboard
