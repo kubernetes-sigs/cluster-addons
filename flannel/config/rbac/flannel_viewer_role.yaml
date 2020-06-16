@@ -1,0 +1,20 @@
+# permissions to do viewer flannels.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: flannel-viewer-role
+rules:
+- apiGroups:
+  - addons.x-k8s.io
+  resources:
+  - flannels
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - addons.x-k8s.io
+  resources:
+  - flannels/status
+  verbs:
+  - get
