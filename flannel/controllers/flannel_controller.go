@@ -26,6 +26,25 @@ type FlannelReconciler struct {
 	Scheme *runtime.Scheme
 
 	declarative.Reconciler
+	watchLabels declarative.LabelMaker
+}
+
+func (r *FlannelReconciler) setupReconciler(mgr ctrl.Manager) error {
+	labels := map[string]string{
+		"k8s-app": "flannel",
+	}
+
+	r.watchLabels = declarative.SourceLabel(mgr.GetScheme())
+
+	return r.Reconciler.Init(mgr, &api.Flannel{},
+		declarative.WithObjectTransform(declarative.AddLabels(labels)),
+		declarative.WithOwner(declarative.SourceAsOwner),
+		declarative.WithLabels(r.watchLabels),
+		declarative.WithStatus(status.NewBasic(mgr.GetClient())),
+		// TODO: add an application to your manifest:  declarative.WithObjectTransform(addon.TransformApplicationFromStatus),
+		// TODO: add an application to your manifest:  declarative.WithManagedApplication(watchLabels),
+		declarative.WithObjectTransform(addon.ApplyPatches),
+	)
 }
 
 // +kubebuilder:rbac:groups=addons.x-k8s.io,resources=flannels,verbs=get;list;watch;create;update;patch;delete
@@ -34,21 +53,7 @@ type FlannelReconciler struct {
 func (r *FlannelReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	addon.Init()
 
-	labels := map[string]string{
-		"k8s-app": "flannel",
-	}
-
-	watchLabels := declarative.SourceLabel(mgr.GetScheme())
-
-	if err := r.Reconciler.Init(mgr, &api.Flannel{},
-		declarative.WithObjectTransform(declarative.AddLabels(labels)),
-		declarative.WithOwner(declarative.SourceAsOwner),
-		declarative.WithLabels(watchLabels),
-		declarative.WithStatus(status.NewBasic(mgr.GetClient())),
-		// TODO: add an application to your manifest:  declarative.WithObjectTransform(addon.TransformApplicationFromStatus),
-		// TODO: add an application to your manifest:  declarative.WithManagedApplication(watchLabels),
-		declarative.WithObjectTransform(addon.ApplyPatches),
-	); err != nil {
+	if err := r.setupReconciler(mgr); err != nil {
 		return err
 	}
 
@@ -64,7 +69,7 @@ func (r *FlannelReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	}
 
 	// Watch for changes to deployed objects
-	_, err = declarative.WatchAll(mgr.GetConfig(), c, r, watchLabels)
+	_, err = declarative.WatchAll(mgr.GetConfig(), c, r, r.watchLabels)
 	if err != nil {
 		return err
 	}
