@@ -66,14 +66,12 @@ func main() {
 
 	for _, obj := range objs.Items{
 
-		if _, ok := m[obj.Kind]; ok {
-			// if kind is already added, skip
-		} else {
+		if _, ok := m[obj.Kind]; !ok {
 			newRule := rule {
 				ApiGroups: []string{obj.Group},
 				// needs plural of kind
 				Resources: []string{resourceFromKind(obj.Kind)},
-				Verbs: []string{"create", "update", "delete"},
+				Verbs: []string{"create", "update", "delete", "get"},
 			}
 			roleInterface.Rules = append(roleInterface.Rules, &newRule)
 			m[obj.Kind] = ""
