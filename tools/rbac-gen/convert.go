@@ -13,7 +13,6 @@ import (
 func ParseYAMLtoRole(manifestStr string) (string, error){
 	ctx := context.Background()
 	objs, err := manifest.ParseObjects(ctx, manifestStr)
-
 	if err != nil {
 		return "", err
 	}
@@ -28,8 +27,8 @@ func ParseYAMLtoRole(manifestStr string) (string, error){
 			APIVersion: "rbac.authorization.k8s.io/v1",
 		},
 	}
-	// to deal with duplicates, we keep a map of all the kinds that has been addeed so far
-	kindMap := make(map[string]string)
+	// to deal with duplicates, we keep a map of all the kinds that has been added so far
+	kindMap := make(map[string]bool)
 
 	for _, obj := range objs.Items{
 		// The generated role needs the rules from any role or clusterrole
@@ -70,7 +69,7 @@ func ParseYAMLtoRole(manifestStr string) (string, error){
 			}
 		}
 
-		if _, ok := kindMap[obj.Kind]; !ok {
+		if kindMap[obj.Group + "::" + obj.Kind] {
 			newRule := v1.PolicyRule{
 				APIGroups: []string{obj.Group},
 				// needs plural of kind
@@ -78,7 +77,7 @@ func ParseYAMLtoRole(manifestStr string) (string, error){
 				Verbs: []string{"create", "update", "delete", "get"},
 			}
 			clusterRole.Rules = append(clusterRole.Rules, newRule)
-			kindMap[obj.Kind] = ""
+			kindMap[obj.Group + "::" + obj.Kind] = true
 		}
 	}
 
@@ -87,7 +86,6 @@ func ParseYAMLtoRole(manifestStr string) (string, error){
 }
 
 func resourceFromKind(kind string)  string{
-	//map of apiresources that follow a different role
 	if string(kind[len(kind)-1]) == "s" {
 		return strings.ToLower(kind) + "es"
 	}
