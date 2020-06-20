@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"context"
-	"fmt"
+	"k8s.io/klog"
 	"strings"
 
 	"sigs.k8s.io/controller-runtime/pkg/controller"
@@ -87,9 +87,11 @@ func replaceVariables(mgr ctrl.Manager) declarative.ManifestOperation {
 		o := object.(*api.LocalNodeDNS)
 		kubeProxyMode, err := findKubeProxyMode(ctx, mgr.GetClient())
 		if err != nil {
-			fmt.Println("Error determining kube-proxy mode: Defaulting to iptables")
+			klog.Warningf("error determining kube-proxy mode, defaulting to iptables: %v", err)
 		}
 
+		// TODO: port findClusterIP and getDNSDomain from coredns/controllers/utils in the kubebuilder-declarative
+		// -pattern repo and use it here
 		if o.Spec.DNSDomain == "" {
 			o.Spec.DNSDomain = "cluster.local"
 		}
