@@ -1,0 +1,38 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: main-manager-role
+rules:
+- apiGroups: ["apps"]
+  resources:
+    - "daemonsets"
+  verbs: ["create", "get", "watch", "update"]
+- apiGroups: [""]
+  resources:
+    - "configmaps"
+    - "serviceaccounts"
+  verbs: ["create", "get", "watch", "update"]
+- apiGroups: ["rbac.authorization.k8s.io"]
+  resources:
+    - "clusterrolebindings"
+    - "clusterroles"
+  verbs: ["create", "get", "watch", "update"]
+- apiGroups:
+    - ""
+  resources:
+    - pods
+  verbs:
+    - get
+- apiGroups:
+    - ""
+  resources:
+    - nodes
+  verbs:
+    - list
+    - watch
+- apiGroups:
+    - ""
+  resources:
+    - nodes/status
+  verbs:
+    - patch
