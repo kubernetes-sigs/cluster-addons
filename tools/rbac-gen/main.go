@@ -30,9 +30,9 @@ func run() error{
 	if err != nil {
 		return err
 	}
+
 	// generate Group and Kind
 	output, err := ParseYAMLtoRole(string(bytes))
-
 	if err != nil {
 		return err
 	}
