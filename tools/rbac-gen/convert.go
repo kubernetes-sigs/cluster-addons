@@ -5,6 +5,7 @@ import (
 	"context"
 
 	"sigs.k8s.io/kubebuilder-declarative-pattern/pkg/patterns/declarative/pkg/manifest"
+	"k8s.io/apimachinery/pkg/runtime"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/api/rbac/v1"
 	"sigs.k8s.io/yaml"
@@ -34,42 +35,17 @@ func ParseYAMLtoRole(manifestStr string) (string, error){
 		// The generated role needs the rules from any role or clusterrole
 		if obj.Kind == "Role" || obj.Kind == "ClusterRole" {
 			unstruct := obj.UnstructuredObject()
-			rules := unstruct.Object["rules"]
-			//fmt.Println(rules)
-			for _, rule := range rules.([]interface{}){
-				rule := rule.(map[string]interface{})
+			newClusterRole := v1.ClusterRole{}
 
-				// we have to convert []interface{} to []string
-				verbs := []string{}
-				for _, intf := range rule["verbs"].([]interface{}) {
-					verb := intf.(string)
-					verbs = append(verbs, verb)
-				}
-
-				resources := []string{}
-				for _, intf := range rule["resources"].([]interface{}) {
-					resource := intf.(string)
-					resources = append(resources, resource)
-				}
-
-				apiGroups := []string{}
-				for _, intf := range rule["apiGroups"].([]interface{}) {
-					apiGroup := intf.(string)
-					apiGroups = append(apiGroups, apiGroup)
-				}
-
-				// TODO: Check for duplicates
-				newRule := v1.PolicyRule{
-					Verbs:           verbs,
-					APIGroups:       apiGroups,
-					Resources:       resources,
-				}
-
-				clusterRole.Rules = append(clusterRole.Rules, newRule)
+			// Converting from unstructured to v1.ClusterRole
+			err := runtime.DefaultUnstructuredConverter.FromUnstructured(unstruct.Object, &newClusterRole)
+			if err != nil {
+				return "", err
 			}
+			clusterRole.Rules = append(clusterRole.Rules, newClusterRole.Rules...)
 		}
 
-		if kindMap[obj.Group + "::" + obj.Kind] {
+		if !kindMap[obj.Group + "::" + obj.Kind] {
 			newRule := v1.PolicyRule{
 				APIGroups: []string{obj.Group},
 				// needs plural of kind
