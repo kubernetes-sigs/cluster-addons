@@ -10,6 +10,7 @@ import (
 var (
 	yamlFile = flag.String("yaml", "manifest.yaml", "yaml file from which the rbac will be generated.")
 	name = flag.String("name", "generated-role", "name of role to be generated")
+	saName = flag.String("sa-name", "", "name of service account the role should be binded to")
 	ns = flag.String("ns", "kube-system", "namespace of the role to be generated")
 	out = flag.String("out", "", "name of output file")
 )
@@ -40,7 +41,7 @@ func run() error{
 	if *out == "" {
 		fmt.Fprintf(os.Stdout, output)
 	} else {
-		err = ioutil.WriteFile("out.yaml", []byte(output), 0644)
+		err = ioutil.WriteFile(*out, []byte(output), 0644)
 	}
 
 	return err

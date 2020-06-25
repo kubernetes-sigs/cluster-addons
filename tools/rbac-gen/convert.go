@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"strings"
 	"context"
 
@@ -58,7 +59,41 @@ func ParseYAMLtoRole(manifestStr string) (string, error){
 	}
 
 	output, err := yaml.Marshal(&clusterRole)
-	return string(output), err
+	buf := bytes.NewBuffer(output)
+
+	// if saName is passed in, generate YAML for rolebinding
+	if *saName != "" {
+		clusterRoleBinding := v1.ClusterRoleBinding{
+			TypeMeta:   metav1.TypeMeta{
+				Kind: "ClusterRoleBinding",
+				APIVersion: "rbac.authorization.k8s.io/v1",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: *ns,
+				Name: *name + "-binding",
+			},
+			Subjects: []v1.Subject{
+				{
+					Kind: "ServiceAccount",
+					Name: *saName,
+					Namespace: *ns,
+				},
+			},
+			RoleRef:    v1.RoleRef{
+				APIGroup: "rbac.authorization.k8s.io",
+				Kind: "ClusterRole",
+				Name: *name,
+			},
+		}
+
+		outputBinding, err := yaml.Marshal(&clusterRoleBinding)
+		if err != nil{
+			return "", err
+		}
+		buf.WriteString("\n---\n\n")
+		buf.Write(outputBinding)
+	}
+	return buf.String(), err
 }
 
 func resourceFromKind(kind string)  string{
