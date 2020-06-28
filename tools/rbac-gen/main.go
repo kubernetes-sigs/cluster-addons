@@ -13,6 +13,7 @@ var (
 	saName = flag.String("sa-name", "", "name of service account the role should be binded to")
 	ns = flag.String("ns", "kube-system", "namespace of the role to be generated")
 	out = flag.String("out", "", "name of output file")
+	supervisory = flag.Bool("supervisory", false, "outputs role for operator in supervisory mode")
 )
 
 func main() {
@@ -25,7 +26,6 @@ func main() {
 
 func run() error{
 	flag.Parse()
-
 	//	read yaml file passed in from cmd
 	bytes, err := ioutil.ReadFile(*yamlFile)
 	if err != nil {

@@ -35,6 +35,9 @@ func ParseYAMLtoRole(manifestStr string) (string, error){
 	for _, obj := range objs.Items{
 		// The generated role needs the rules from any role or clusterrole
 		if obj.Kind == "Role" || obj.Kind == "ClusterRole" {
+			if *supervisory {
+				continue
+			}
 			unstruct := obj.UnstructuredObject()
 			newClusterRole := v1.ClusterRole{}
 
