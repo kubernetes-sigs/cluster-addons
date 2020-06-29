@@ -1,0 +1,7 @@
+domain: x-k8s.io
+repo: sigs.k8s.io/cluster-addons/flannel
+resources:
+- group: addons
+  kind: Flannel
+  version: v1alpha1
+version: "2"
