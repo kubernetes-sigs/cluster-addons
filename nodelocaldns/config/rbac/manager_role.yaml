@@ -1,0 +1,14 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: main-manager-role
+rules:
+- apiGroups: [""]
+  resources: ["services", "serviceaccounts", "configmaps"]
+  verbs: ["create", "get", "list", "watch", "delete", "patch"]
+- apiGroups: ["apps"]
+  resources: ["daemonsets"]
+  verbs: ["create", "get", "list", "watch", "delete", "patch"]
+- apiGroups: ["app.k8s.io"]
+  resources: ["applications"]
+  verbs: ["create", "get", "list", "watch", "delete", "patch"]
