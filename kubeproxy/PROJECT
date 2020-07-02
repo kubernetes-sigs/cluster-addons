@@ -1,0 +1,7 @@
+version: "2"
+domain: x-k8s.io
+repo: addon-operators/kubeproxy
+resources:
+- group: addons
+  version: v1alpha1
+  kind: KubeProxy

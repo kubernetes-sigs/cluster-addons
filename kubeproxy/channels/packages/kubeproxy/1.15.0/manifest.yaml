@@ -1,0 +1,106 @@
+apiVersion: app.k8s.io/v1beta1
+kind: Application
+metadata:
+  name: kube-proxy
+  namespace: {{.Namespace}}
+  annotations:
+spec:
+  descriptor:
+    type: "kube-proxy"
+    description: |
+      The Kubernetes network proxy runs on each node.
+      This reflects services as defined in the Kubernetes API on
+       each node and can do simple TCP, UDP, and SCTP stream forwarding
+       or round robin TCP, UDP, and SCTP forwarding across a set of
+       backends. Service cluster IPs and ports are currently found through
+       Docker-links-compatible environment variables specifying ports opened
+       by the service proxy.
+    icons:
+    - src: "https://github.com/kubernetes/kubernetes/raw/master/logo/logo.png"
+      type: "image/png"
+    keywords:
+    - "addon"
+    - "proxy"
+    links:
+    - description: Project Homepage
+      url: "https://github.com/kubernetes/kubernetes"
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: kube-proxy
+spec:
+  selector:
+    matchLabels:
+      k8s-app: kube-proxy
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 10%
+  template:
+    metadata:
+      labels:
+        k8s-app: kube-proxy
+      annotations:
+        scheduler.alpha.kubernetes.io/critical-pod: ''
+    spec:
+      priorityClassName: system-node-critical
+      hostNetwork: true
+      tolerations:
+      - operator: "Exists"
+        effect: "NoExecute"
+      - operator: "Exists"
+        effect: "NoSchedule"
+      containers:
+      - name: kube-proxy
+        image: k8s.gcr.io/kube-proxy:v1.15.0
+        resources:
+          requests:
+            cpu: 50m
+        command:
+        - /bin/sh
+        - -c
+        - kube-proxy --resource-container="" --oom-score-adj=-998 {{params}}
+          #1>>/var/log/kube-proxy.log 2>&1
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - mountPath: /var/log
+          name: varlog
+          readOnly: false
+        - mountPath: /run/xtables.lock
+          name: xtables-lock
+          readOnly: false
+        - mountPath: /lib/modules
+          name: lib-modules
+          readOnly: true
+      volumes:
+      - name: varlog
+        hostPath:
+          path: /var/log
+      - name: xtables-lock
+        hostPath:
+          path: /run/xtables.lock
+          type: FileOrCreate
+      - name: lib-modules
+        hostPath:
+          path: /lib/modules
+      serviceAccountName: kube-proxy
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kube-proxy
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: system:kube-proxy
+subjects:
+  - kind: ServiceAccount
+    name: kube-proxy
+    namespace: {{.Namespace}}
+roleRef:
+  kind: ClusterRole
+  name: system:node-proxier
+  apiGroup: rbac.authorization.k8s.io
