@@ -1,4 +1,3 @@
-
 # Image URL to use all building/pushing image targets
 IMG ?= controller:latest
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
@@ -37,6 +36,11 @@ uninstall: manifests
 deploy: manifests
 	cd config/manager && kustomize edit set image controller=${IMG}
 	kustomize build config/default | kubectl apply -f -
+
+# Teardown controller in the configured Kubernetes cluster in ~/.kube/config
+# This command does things that can't always re-run so the exit codes are ignored
+teardown: manifests
+	kustomize build config/default | kubectl delete -f - || true
 
 # Generate manifests e.g. CRD, RBAC etc.
 manifests: controller-gen
