@@ -13,6 +13,7 @@ import (
 	"sigs.k8s.io/kubebuilder-declarative-pattern/pkg/patterns/addon"
 	"sigs.k8s.io/kubebuilder-declarative-pattern/pkg/patterns/addon/pkg/status"
 	"sigs.k8s.io/kubebuilder-declarative-pattern/pkg/patterns/declarative"
+	"sigs.k8s.io/kubebuilder-declarative-pattern/utils"
 
 	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -94,11 +95,14 @@ func replaceVariables(mgr ctrl.Manager) declarative.ManifestOperation {
 		// TODO: port findClusterIP and getDNSDomain from coredns/controllers/utils in the kubebuilder-declarative
 		// -pattern repo and use it here
 		if o.Spec.DNSDomain == "" {
-			o.Spec.DNSDomain = "cluster.local"
+			o.Spec.DNSDomain = utils.GetDNSDomain()
 		}
 
 		if o.Spec.DNSIP == "" {
-			o.Spec.DNSIP = "169.254.20.10"
+			o.Spec.DNSIP, err = utils.FindDNSClusterIP(ctx, mgr.GetClient())
+			if err != nil {
+				return "", err
+			}
 		}
 
 		if o.Spec.ClusterIP == "" {

@@ -8,7 +8,7 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// nodelocaldnsSpec defines the desired state of nodelocaldns
+// NodeLocalDNSSpec defines the desired state of NodeLocalDNS
 type NodeLocalDNSSpec struct {
 	addonv1alpha1.CommonSpec `json:",inline"`
 	addonv1alpha1.PatchSpec  `json:",inline"`
@@ -20,7 +20,7 @@ type NodeLocalDNSSpec struct {
 	ClusterIP string `json:"clusterIP,omitempty"`
 }
 
-// nodelocaldnsStatus defines the observed state of nodelocaldns
+// NodeLocalDNSStatus defines the observed state of NodeLocalDNS
 type NodeLocalDNSStatus struct {
 	addonv1alpha1.CommonStatus `json:",inline"`
 
@@ -30,7 +30,7 @@ type NodeLocalDNSStatus struct {
 
 // +kubebuilder:object:root=true
 
-// nodelocaldns is the Schema for the nodelocaldns API
+// NodeLocalDNS is the Schema for the nodelocaldns API
 type NodeLocalDNS struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -63,7 +63,7 @@ func (o *NodeLocalDNS) SetCommonStatus(s addonv1alpha1.CommonStatus) {
 
 // +kubebuilder:object:root=true
 
-// NodelocaldnsList contains a list of nodelocaldns
+// NodeLocalDNSList contains a list of nodelocaldns
 type NodeLocalDNSList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
