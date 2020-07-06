@@ -45,9 +45,6 @@ type MetricsServerReconciler struct {
 
 var _ reconcile.Reconciler = &MetricsServerReconciler{}
 
-// +kubebuilder:rbac:groups=addons.x-k8s.io,resources=metricsservers,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=addons.x-k8s.io,resources=metricsservers/status,verbs=get;update;patch
-
 func (r *MetricsServerReconciler) setupReconciler(mgr ctrl.Manager) error {
 	labels := map[string]string{
 		"k8s-app": "metrics-server",
@@ -89,3 +86,19 @@ func (r *MetricsServerReconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 	return nil
 }
+
+// for WithApplyPrune
+// +kubebuilder:rbac:groups=*,resources=*,verbs=list
+
+// +kubebuilder:rbac:groups=addons.x-k8s.io,resources=metricsservers,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=addons.x-k8s.io,resources=metricsservers/status,verbs=get;update;patch
+
+// +kubebuilder:rbac:groups=rbac.authorization.k8s.io,resources=roles;rolebindings;clusterroles;clusterrolebindings,verbs=get;list;watch;create;update;delete;patch
+// +kubebuilder:rbac:groups=apiregistration.k8s.io,resources=apiservices,verbs=get;list;watch;create;update;delete;patch
+// +kubebuilder:rbac:groups="",resources=services;serviceaccounts;secrets,verbs=get;list;watch;create;update;delete;patch
+// +kubebuilder:rbac:groups=apps;extensions,resources=deployments,verbs=get;list;watch;create;update;delete;patch
+// +kubebuilder:rbac:groups="",resources=services,verbs=get;list;watch;create;update;delete;patch
+// +kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list;watch;create;update;delete;patch
+
+// +kubebuilder:rbac:groups="metrics.k8s.io",resources=pods;nodes,verbs=get;list;watch
+// +kubebuilder:rbac:groups="",resources=pods;nodes;nodes/stats;namespaces,verbs=get;list;watch
