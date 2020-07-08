@@ -29,6 +29,9 @@ make test -C coredns
 echo "****** Testing Dashboard Operator ******"
 make test -C dashboard
 
+echo "****** Testing Flannel Operator ******"
+make test -C flannel
+
 echo "****** Testing Metrics-server Operator ******"
 make test -C metrics-server
 
