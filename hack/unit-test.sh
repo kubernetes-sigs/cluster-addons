@@ -40,3 +40,6 @@ make test -C metrics-server
 
 echo "****** Testing Bootstrap Utility ******"
 make test -C bootstrap
+
+echo "****** Testing Node-Local-DNS Operator ******"
+make test -C nodelocaldns
