@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -10,21 +11,50 @@ import (
 	"os"
 )
 
-func main() {
-	kubeconfig := flag.String("kubeconfig", "~/.kube/config", "kubeconfig file")
+var (
+	kubeconfig =  flag.String("kubeconfig", "~/.kube/config", "kubeconfig file")
+	ns =  flag.String("ns", "", "namespace")
+)
 
+func main() {
 	flag.Parse()
 
-	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
-	clientset, err := kubernetes.NewForConfig(config)
-
-	pod, err := clientset.CoreV1().Pods("").Get("kindnet-j4dpv", metav1.GetOptions{})
-	args := os.Args[1:]
-
-	if args[0] == "config" {
-		fmt.Println(os.Getenv("KUBECONFOG"))
-		os.Exit(0)
+	if err := run(); err != nil {
+		fmt.Fprintf(os.Stderr, "%v\n", err)
+		os.Exit(1)
 	}
 
-	fmt.Println("I am a plugin named foo")
+}
+
+func run() error{
+	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
+	if err != nil{
+		return err
+	}
+
+	clientset, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		return nil
+	}
+
+	listOpts := metav1.ListOptions{}
+	pods, err := clientset.CoreV1().Pods(*ns).List(listOpts)
+	if err != nil {
+		return err
+	}
+
+	printPods(pods)
+}
+
+func printPods(podlist *v1.PodList) {
+	template := "%-32s%-8s-%-8s\n"
+	fmt.Printf(template, "NAMESPACE","NAME", "STATUS")
+
+	for _, pod := range podlist.Items {
+		fmt.Printf(template,
+			pod.Namespace,
+			pod.Name,
+			pod.Status,
+		)
+	}
 }
