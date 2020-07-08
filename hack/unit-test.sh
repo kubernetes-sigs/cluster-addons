@@ -32,6 +32,9 @@ make test -C dashboard
 echo "****** Testing Flannel Operator ******"
 make test -C flannel
 
+echo "****** Testing Kube-Proxy Operator ******"
+make test -C kubeproxy
+
 echo "****** Testing Metrics-server Operator ******"
 make test -C metrics-server
 
