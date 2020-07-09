@@ -10,6 +10,6 @@ spec:
       - name: manager
         env:
           - name: KUBERNETES_SERVICE_HOST
-            value: "172.17.0.2"
+            value: "172.17.0.3"
           - name: KUBERNETES_SERVICE_PORT
             value: "6443"
