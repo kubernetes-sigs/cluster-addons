@@ -31,8 +31,6 @@ func main() {
 
 	flag.Parse()
 
-	fmt.Println(*ns, *kubeconfig)
-
 	if err := run(kubeconfig); err != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", err)
 		os.Exit(1)
