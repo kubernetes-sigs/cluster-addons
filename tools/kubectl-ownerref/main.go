@@ -92,8 +92,7 @@ func PrintResource(c dynamic.Interface, resource schema.GroupVersionResource, ki
 
 // PrintList is a function for printing all kinds of resources
 func PrintList(list *unstructured.UnstructuredList, kind, name string) {
-	template := "%-32s%-8s\n"
-	// -%-8s
+	template := "%-32s%-32s%-8s\n"
 	if len(list.Items) == 0 {
 		return
 	}
@@ -111,11 +110,12 @@ func PrintList(list *unstructured.UnstructuredList, kind, name string) {
 		return
 	}
 
-	fmt.Printf(template, "NAMESPACE", "NAME")
+	fmt.Printf(template, "KIND", "NAMESPACE", "NAME")
 	for _, ownerItem := range ownerItems {
 		fmt.Printf(template,
+			ownerItem.GetKind(),
 			ownerItem.GetNamespace(),
-			fmt.Sprintf("%v/%v", strings.ToLower(ownerItem.GetKind()), ownerItem.GetName()),
+			ownerItem.GetName(),
 		)
 	}
 	fmt.Println()
