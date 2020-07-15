@@ -51,10 +51,8 @@ import (
 )
 
 const (
-	// Set default namespace for your operator.
-	defaultOperatorNamespace = "coredns-operator-system"
-	// Set default namespace for CoreDNS.
-	defaultCoreDNSNamespace = "kube-system"
+	// Namespace for Dashboard.
+	dashboardNamespace = "kubernetes-dashboard"
 )
 
 type (
@@ -128,6 +126,8 @@ func main() {
 	var operators []AddonTest
 	for _, test := range []AddonTest{
 		NewCoreDNSTest(c),
+		NewDashboardTest(c),
+		NewMetricsServerTest(c),
 	} {
 		if _, ignored := ignore[test.Name()]; ignored {
 			log.Printf("ignoring test: %s", test.Name())
@@ -307,7 +307,7 @@ func verifyExistClusterRoleBinding(clientset kubernetes.Interface, name string) 
 
 func verifySteps(clientset kubernetes.Interface, steps []verifyStep) error {
 	for _, step := range steps {
-		if err := step.fn(clientset, defaultCoreDNSNamespace, step.prefixes...); err != nil {
+		if err := step.fn(clientset, metav1.NamespaceSystem, step.prefixes...); err != nil {
 			return err
 		}
 	}
@@ -525,7 +525,7 @@ func (h *RealTestHarness) Fatal(msg string) {
 
 var _ TestHarness = &RealTestHarness{}
 
-var commonAddonTest AddonTest = &CommonAddonTest{}
+var _ AddonTest = &CommonAddonTest{}
 
 func (c *CommonAddonTest) Basedir() string {
 	return c.Base
@@ -552,14 +552,7 @@ func (c *CommonAddonTest) DeleteResources() {
 }
 
 func (c *CommonAddonTest) VerifyUp() error {
-	h := c.Harness
-
-	err := verifyReadyPods(h, defaultOperatorNamespace, "coredns-operator")
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return fmt.Errorf("VerifyUp not implemented for operator: %s", c.Name())
 }
 
 func (c *CommonAddonTest) CustomScenarios() error {
@@ -568,30 +561,30 @@ func (c *CommonAddonTest) CustomScenarios() error {
 }
 
 func (c *CommonAddonTest) Disrupt() {
-	_, err := executeCommand("kubectl", "delete", "pods", "-l", "k8s-app=kube-dns", "-n", defaultOperatorNamespace)
-	if err != nil {
-		glog.Warningf("kubectl delete finished with error: %v", err)
-	}
+	// no-op
+	// Specific operators should add specific disruption scenarios
+	glog.Infof("Disrupt not configured for operator: %s", c.Name())
 }
 
 func (c *CommonAddonTest) VerifyDown() error {
-	return verifyNoWorkloadsWithLabel("k8s-app=kube-dns", defaultOperatorNamespace)
+	return fmt.Errorf("VerifyDown not implemented for operator: %s", c.Name())
 }
 
+// Test for the CoreDNS Operator
 type CoreDNSTest struct {
 	CommonAddonTest
 }
 
 func NewCoreDNSTest(c CommonAddonTest) *CoreDNSTest {
 	t := &CoreDNSTest{CommonAddonTest: c}
-	t.Base = "../"
+	t.Base = "../coredns"
 	return t
 }
 
 func (t *CoreDNSTest) VerifyUp() error {
 	h := t.Harness
 
-	err := verifyReadyPods(h, defaultCoreDNSNamespace, "coredns-")
+	err := verifyReadyPods(h, metav1.NamespaceSystem, "coredns-")
 	if err != nil {
 		return err
 	}
@@ -600,12 +593,78 @@ func (t *CoreDNSTest) VerifyUp() error {
 }
 
 func (t *CoreDNSTest) Disrupt() {
-	_, err := executeCommand("kubectl", "delete", "all", "-l", "k8s-app=kube-dns", "-n", defaultCoreDNSNamespace)
+	_, err := executeCommand("kubectl", "delete", "all", "-l", "k8s-app=kube-dns", "-n", metav1.NamespaceSystem)
 	if err != nil {
 		glog.Warningf("kubectl delete finished with error: %v", err)
 	}
 }
 
 func (t *CoreDNSTest) VerifyDown() error {
-	return verifyNoWorkloadsWithLabel("k8s-app=kube-dns", defaultCoreDNSNamespace)
+	return verifyNoWorkloadsWithLabel("k8s-app=kube-dns", metav1.NamespaceSystem)
+}
+
+// Test for the Metrics-server Operator
+type MetricsServerTest struct {
+	CommonAddonTest
+}
+
+func NewMetricsServerTest(c CommonAddonTest) *MetricsServerTest {
+	m := &MetricsServerTest{CommonAddonTest: c}
+	m.Base = "../metrics-server"
+	return m
+}
+
+func (m *MetricsServerTest) VerifyUp() error {
+	h := m.Harness
+
+	err := verifyReadyPods(h, metav1.NamespaceSystem, "metrics-server")
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *MetricsServerTest) Disrupt() {
+	_, err := executeCommand("kubectl", "delete", "all", "-l", "k8s-app=metrics-server", "-n", metav1.NamespaceSystem)
+	if err != nil {
+		glog.Warningf("kubectl delete finished with error: %v", err)
+	}
+}
+
+func (m *MetricsServerTest) VerifyDown() error {
+	return verifyNoWorkloadsWithLabel("k8s-app=metrics-server", metav1.NamespaceSystem)
+}
+
+// Test for the Dashboard Operator
+type DashboardTest struct {
+	CommonAddonTest
+}
+
+func NewDashboardTest(c CommonAddonTest) *DashboardTest {
+	d := &DashboardTest{CommonAddonTest: c}
+	d.Base = "../dashboard"
+	return d
+}
+
+func (d *DashboardTest) VerifyUp() error {
+	h := d.Harness
+
+	err := verifyReadyPods(h, dashboardNamespace, "dashboard")
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (d *DashboardTest) Disrupt() {
+	_, err := executeCommand("kubectl", "delete", "all", "-l", "k8s-app=dashboard", "-n", dashboardNamespace)
+	if err != nil {
+		glog.Warningf("kubectl delete finished with error: %v", err)
+	}
+}
+
+func (d *DashboardTest) VerifyDown() error {
+	return verifyNoWorkloadsWithLabel("k8s-app=dashboard", dashboardNamespace)
 }
