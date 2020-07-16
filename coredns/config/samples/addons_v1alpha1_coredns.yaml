@@ -4,7 +4,7 @@ metadata:
   name: coredns-operator
   namespace: kube-system
 spec:
-  version: 1.6.7
+  version: 1.7.0
   dnsDomain: cluster.local
   dnsIP: 10.96.0.10
   corefile: |
@@ -20,7 +20,9 @@ spec:
            ttl 30
         }
         prometheus :9153
-        forward . /etc/resolv.conf
+        forward . /etc/resolv.conf {
+            max_concurrent 1000
+        }
         cache 30
         loop
         reload
