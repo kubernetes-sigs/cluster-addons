@@ -16,8 +16,14 @@ limitations under the License.
 package main
 
 import (
+	"context"
 	"flag"
+	"fmt"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/dynamic"
 	"os"
+
+	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -37,11 +43,13 @@ var (
 func init() {
 	_ = clientgoscheme.AddToScheme(scheme)
 
-	_ = addonsv1alpha1.AddToScheme(scheme)
+	_ = addonsv1alpha1.AddToScheme(scheme) // <--------
 	// +kubebuilder:scaffold:scheme
 }
 
 func main() {
+	var genericList addonsv1alpha1.GenericList
+
 	var metricsAddr string
 	var enableLeaderElection bool
 	flag.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
@@ -64,12 +72,52 @@ func main() {
 		os.Exit(1)
 	}
 
+	clientset, err := dynamic.NewForConfig(mgr.GetConfig())
+	if err != nil {
+		setupLog.Error(err, "unable to start manager")
+		os.Exit(1)
+	}
+
+	resourcesList, err := clientset.Resource(schema.GroupVersionResource{
+		Group:    "addons.x-k8s.io",
+		Version:  "v1alpha1",
+		Resource: "generics",
+	}).Namespace("").List(context.Background(), metav1.ListOptions{})
+
+	runtime.DefaultUnstructuredConverter.FromUnstructured(resourcesList.UnstructuredContent(), &genericList)
+
+	if len(genericList.Items) == 0 {
+		fmt.Fprint(os.Stderr, "Please create a `Generic` resource\n")
+		os.Exit(1)
+	}
+
+	genericObject := genericList.Items[0].Spec.ObjectKind
+
+	gvk := schema.GroupVersionKind{
+		Kind:    genericObject.Kind,
+		Version: "v1alpha1",
+		Group:   genericObject.Group,
+	}
+
+	if genericObject.Channel != "" {
+		if err = flag.Set("channel", genericObject.Channel); err != nil {
+			setupLog.Error(err, "unable to set channel")
+			os.Exit(1)
+		}
+	}
+
+	if err != nil {
+		setupLog.Error(err, "unable to get generic client")
+		os.Exit(1)
+	}
+
 	if err = (&controllers.GenericReconciler{
 		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("Generic"),
+		GVK:    gvk,
+		Log:    ctrl.Log.WithName("controllers").WithName(gvk.Kind),
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "Generic")
+		setupLog.Error(err, "unable to create controller", "controller", gvk.Kind)
 		os.Exit(1)
 	}
 	// +kubebuilder:scaffold:builder

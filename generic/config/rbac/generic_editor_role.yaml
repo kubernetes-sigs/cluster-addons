@@ -7,6 +7,7 @@ rules:
 - apiGroups:
   - addons.x-k8s.io
   resources:
+  # <--------
   - generics
   verbs:
   - create

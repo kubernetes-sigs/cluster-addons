@@ -3,5 +3,8 @@ kind: Generic
 metadata:
   name: generic-sample
 spec:
-  # Add fields here
-  foo: bar
+  objectKind:
+    kind: NodeLocalDNS
+    group: addons.x-k8s.io
+    channel: "../nodelocaldns/channels"
+
