@@ -13,4 +13,4 @@ require (
 	sigs.k8s.io/kubebuilder-declarative-pattern v0.0.0-20200721120314-d8f3ce551a4a
 )
 
-replace sigs.k8s.io/kubebuilder-declarative-pattern => ../../kubebuilder-declarative-pattern
+replace sigs.k8s.io/kubebuilder-declarative-pattern => github.com/SomtochiAma/kubebuilder-declarative-pattern v0.0.0-20200723151822-4aa1e9692ce6
