@@ -16,6 +16,7 @@ type GenericSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 	ObjectKind ObjectKind `json:"objectKind"`
+	Channel    string     `json:"channel"`
 }
 
 // GenericStatus defines the observed state of Generic
@@ -71,7 +72,7 @@ type GenericList struct {
 type ObjectKind struct {
 	Kind    string `json:"kind"`
 	Group   string `json:"group"`
-	Channel string `json:"channel,omitempty"`
+	Version string `json:"version"`
 }
 
 // // GenericOperatorSpec defines the desired state of GenericOperator

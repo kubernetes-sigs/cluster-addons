@@ -42,15 +42,16 @@ spec:
               description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
                 Important: Run "make" to regenerate code after modifying this file'
               properties:
-                channel:
-                  type: string
                 group:
                   type: string
                 kind:
                   type: string
+                version:
+                  type: string
               required:
               - group
               - kind
+              - version
               type: object
             patches:
               items:
@@ -61,6 +62,7 @@ spec:
                 eg 1.2.3 It should not be specified if Channel is specified
               type: string
           required:
+          - channel
           - objectKind
           type: object
         status:

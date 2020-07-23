@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"fmt"
+	"sigs.k8s.io/kubebuilder-declarative-pattern/pkg/patterns/addon/pkg/loaders"
 	"strings"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -30,7 +32,8 @@ type GenericReconciler struct {
 	Scheme *runtime.Scheme
 
 	declarative.Reconciler
-	GVK schema.GroupVersionKind
+	GVK     schema.GroupVersionKind
+	Channel string
 }
 
 // +kubebuilder:rbac:groups=addons.x-k8s.io,resources=generics,verbs=get;list;watch;create;update;patch;delete
@@ -48,6 +51,11 @@ func (r *GenericReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	u := &unstructured.Unstructured{}
 	u.SetGroupVersionKind(r.GVK)
 
+	mc, err := loaders.NewManifestLoader(r.Channel)
+	if err != nil {
+		return fmt.Errorf("unable to create manifest loader: %v", err)
+	}
+
 	if err := r.Reconciler.Init(mgr, u,
 		declarative.WithObjectTransform(declarative.AddLabels(labels)),
 		declarative.WithOwner(declarative.SourceAsOwner),
@@ -58,6 +66,7 @@ func (r *GenericReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		// TODO: add an application to your manifest:
 		declarative.WithManagedApplication(watchLabels),
 		declarative.WithObjectTransform(addon.ApplyPatches),
+		declarative.WithManifestController(mc),
 	); err != nil {
 		return err
 	}

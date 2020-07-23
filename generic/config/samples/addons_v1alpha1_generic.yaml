@@ -5,6 +5,7 @@ metadata:
 spec:
   objectKind:
     kind: NodeLocalDNS
+    version: "v1alpha1"
     group: addons.x-k8s.io
-    channel: "../nodelocaldns/channels"
+  channel: "../nodelocaldns/channels"
 

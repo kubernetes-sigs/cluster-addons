@@ -83,43 +83,44 @@ func main() {
 		Version:  "v1alpha1",
 		Resource: "generics",
 	}).Namespace("").List(context.Background(), metav1.ListOptions{})
+	if err != nil {
+		setupLog.Error(err, "unable to get generic resource")
+		os.Exit(1)
+	}
 
-	runtime.DefaultUnstructuredConverter.FromUnstructured(resourcesList.UnstructuredContent(), &genericList)
+	err = runtime.DefaultUnstructuredConverter.FromUnstructured(resourcesList.UnstructuredContent(), &genericList)
+	if err != nil {
+		setupLog.Error(err, "unable to destructure unstructured")
+		os.Exit(1)
+	}
 
 	if len(genericList.Items) == 0 {
 		fmt.Fprint(os.Stderr, "Please create a `Generic` resource\n")
 		os.Exit(1)
 	}
 
-	genericObject := genericList.Items[0].Spec.ObjectKind
+	for i := range genericList.Items {
+		genericObject := genericList.Items[i].Spec
 
-	gvk := schema.GroupVersionKind{
-		Kind:    genericObject.Kind,
-		Version: "v1alpha1",
-		Group:   genericObject.Group,
-	}
+		gvk := schema.GroupVersionKind{
+			Kind:    genericObject.ObjectKind.Kind,
+			Version: genericObject.ObjectKind.Version,
+			Group:   genericObject.ObjectKind.Group,
+		}
 
-	if genericObject.Channel != "" {
-		if err = flag.Set("channel", genericObject.Channel); err != nil {
-			setupLog.Error(err, "unable to set channel")
+		if err = (&controllers.GenericReconciler{
+			Client:  mgr.GetClient(),
+			GVK:     gvk,
+			Log:     ctrl.Log.WithName("controllers").WithName(gvk.Kind),
+			Scheme:  mgr.GetScheme(),
+			Channel: genericObject.Channel,
+		}).SetupWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create controller", "controller", gvk.Kind)
 			os.Exit(1)
 		}
+
 	}
 
-	if err != nil {
-		setupLog.Error(err, "unable to get generic client")
-		os.Exit(1)
-	}
-
-	if err = (&controllers.GenericReconciler{
-		Client: mgr.GetClient(),
-		GVK:    gvk,
-		Log:    ctrl.Log.WithName("controllers").WithName(gvk.Kind),
-		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", gvk.Kind)
-		os.Exit(1)
-	}
 	// +kubebuilder:scaffold:builder
 
 	setupLog.Info("starting manager")
