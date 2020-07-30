@@ -82,7 +82,9 @@ data:
            ttl 30
         }
         prometheus :9153
-        forward . /etc/resolv.conf
+        forward . /etc/resolv.conf {
+           max_concurrent 1000
+        }
         cache 30
         loop
         reload
@@ -96,7 +98,7 @@ metadata:
     k8s-app: kube-dns
     kubernetes.io/cluster-service: "true"
     kubernetes.io/name: CoreDNS
-  name: coredns-g8c4cb4kfb
+  name: coredns-52c752mgc9
   namespace: kube-system
 
 ---
@@ -139,7 +141,7 @@ spec:
       - args:
         - -conf
         - /etc/coredns/Corefile
-        image: k8s.gcr.io/coredns:1.6.7
+        image: k8s.gcr.io/coredns:1.7.0
         imagePullPolicy: IfNotPresent
         livenessProbe:
           failureThreshold: 5
@@ -197,7 +199,7 @@ spec:
           items:
           - key: Corefile
             path: Corefile
-          name: coredns-g8c4cb4kfb
+          name: coredns-52c752mgc9
         name: config-volume
 
 ---
