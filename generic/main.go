@@ -19,9 +19,10 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"os"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/dynamic"
-	"os"
 
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
@@ -43,7 +44,7 @@ var (
 func init() {
 	_ = clientgoscheme.AddToScheme(scheme)
 
-	_ = addonsv1alpha1.AddToScheme(scheme) // <--------
+	_ = addonsv1alpha1.AddToScheme(scheme)
 	// +kubebuilder:scaffold:scheme
 }
 
@@ -99,6 +100,7 @@ func main() {
 		os.Exit(1)
 	}
 
+	// TODO: Add watch to Generic; respond to chanages
 	for i := range genericList.Items {
 		genericObject := genericList.Items[i].Spec
 

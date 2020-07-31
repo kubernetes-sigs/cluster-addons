@@ -2,8 +2,9 @@ package controllers
 
 import (
 	"fmt"
-	"sigs.k8s.io/kubebuilder-declarative-pattern/pkg/patterns/addon/pkg/loaders"
 	"strings"
+
+	"sigs.k8s.io/kubebuilder-declarative-pattern/pkg/patterns/addon/pkg/loaders"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -76,7 +77,7 @@ func (r *GenericReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		return err
 	}
 
-	// Watch for changes to Generic
+	// Watch for changes to objectKind
 	err = c.Watch(&source.Kind{Type: u}, &handler.EnqueueRequestForObject{})
 	if err != nil {
 		return err
