@@ -63,9 +63,9 @@ func (r *GenericReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		declarative.WithLabels(watchLabels),
 		declarative.WithStatus(status.NewBasic(mgr.GetClient())),
 		// TODO: add an application to your manifest:
-		declarative.WithObjectTransform(addon.TransformApplicationFromStatus),
+		// declarative.WithObjectTransform(addon.TransformApplicationFromStatus),
 		// TODO: add an application to your manifest:
-		declarative.WithManagedApplication(watchLabels),
+		// declarative.WithManagedApplication(watchLabels),
 		declarative.WithObjectTransform(addon.ApplyPatches),
 		declarative.WithManifestController(mc),
 	); err != nil {

@@ -5,14 +5,16 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+
+	"sigs.k8s.io/cluster-addons/tools/rbac-gen/pkg/convert"
 )
 
 var (
-	yamlFile = flag.String("yaml", "manifest.yaml", "yaml file from which the rbac will be generated.")
-	name = flag.String("name", "generated-role", "name of role to be generated")
-	saName = flag.String("sa-name", "", "name of service account the role should be binded to")
-	ns = flag.String("ns", "kube-system", "namespace of the role to be generated")
-	out = flag.String("out", "", "name of output file")
+	yamlFile    = flag.String("yaml", "manifest.yaml", "yaml file from which the rbac will be generated.")
+	name        = flag.String("name", "generated-role", "name of role to be generated")
+	saName      = flag.String("sa-name", "", "name of service account the role should be binded to")
+	ns          = flag.String("ns", "kube-system", "namespace of the role to be generated")
+	out         = flag.String("out", "", "name of output file")
 	supervisory = flag.Bool("supervisory", false, "outputs role for operator in supervisory mode")
 )
 
@@ -24,7 +26,7 @@ func main() {
 	}
 }
 
-func run() error{
+func run() error {
 	flag.Parse()
 	//	read yaml file passed in from cmd
 	bytes, err := ioutil.ReadFile(*yamlFile)
@@ -33,7 +35,7 @@ func run() error{
 	}
 
 	// generate Group and Kind
-	output, err := ParseYAMLtoRole(string(bytes))
+	output, err := convert.ParseYAMLtoRole(string(bytes), *name, *ns, *saName, *supervisory)
 	if err != nil {
 		return err
 	}
@@ -46,4 +48,3 @@ func run() error{
 
 	return err
 }
-
