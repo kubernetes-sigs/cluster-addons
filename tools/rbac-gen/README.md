@@ -13,27 +13,28 @@ When the flag is set to false, it parses a clusterrole in the manifest and adds 
 
 ## Usage
 
-- Clone the cluster-addons repository
+1. Get the code
   
 ```shell script
-git clone https://github.com/kubernetes-sigs/cluster-addons.git
+go get https://github.com/kubernetes-sigs/cluster-addons
 ```
    
--   Change directory into `tools/rbac-gen`
+2. Build
 
 ```shell script
-cd cd cluster-addons/tools/rbac-gen
+cd $GOPATH/kubernetes-sigs/cluster-addons/tools/rbac-gen
+go install
 ```
 
 
 - Run the go program
 
 ```shell script
-go run main.go --yaml <YOUR-MANIFEST-YAML>
+rbac-gen --yaml <YOUR-MANIFEST-YAML>
 ```
 Example:
 ```shell script
-go run main.go --yaml channels/packages/dashboard/manifest.yaml
+rbac-gen --yaml channels/packages/dashboard/manifest.yaml
 ```
 
 There are optional flags like 

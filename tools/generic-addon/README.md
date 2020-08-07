@@ -15,27 +15,28 @@
   
   ## Usage
   
-  - Clone the cluster-addons repository
+  1. Get the code
+    
+  ```shell script
+  go get https://github.com/kubernetes-sigs/cluster-addons
+  ```
+     
+  2. Build
   
-```shell script
-git clone https://github.com/kubernetes-sigs/cluster-addons.git
-```
-   
--   Change directory into `tools/generic-addon`
+  ```shell script
+  cd $GOPATH/kubernetes-sigs/cluster-addons/tools/generic-addon
+  go install
+  ```
+ 
+  3. Run the go program
 
 ```shell script
-cd cd cluster-addons/tools/generic-addon 
+generic-addon <KIND> <GROUP> <CHANNEL>
 ```
 
-
-- Run the go program
-
-```shell script
-go run main.go <KIND> <GROUP> <CHANNEL>
-```
 Example:
 ```shell script
-go run main.go Dashboard addons.x-k8s.io ../channels
+generic-addon Dashboard addons.x-k8s.io ../channels
 ```
 This command generates two files - `dashboard_crd_rbac.yaml` and `dashboard_sample.yaml`
 
