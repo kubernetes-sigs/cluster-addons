@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 
 	"sigs.k8s.io/cluster-addons/tools/rbac-gen/pkg/convert"
 
@@ -73,7 +74,24 @@ func run() error {
 		allRbac = allRbac + rbac + "\n---\n"
 	}
 
-	fmt.Println(addonCRD + crdRBAC + sampleYAML + genericYaml + allRbac)
+	crdFilename := lower+"_"+"crd_rbac.yaml"
+	crFilename := lower+"_"+"sample.yaml"
+
+	crdRBACStr := addonCRD + crdRBAC + genericYaml + allRbac
+	sampleCRStr := sampleYAML
+
+	err = ioutil.WriteFile(crdFilename, []byte(crdRBACStr), 0644)
+	if err != nil {
+		return fmt.Errorf("error writing to file: %v", err)
+	}
+
+	err = ioutil.WriteFile(crFilename, []byte(sampleCRStr), 0644)
+	if err != nil {
+		return fmt.Errorf("error writing to file: %v", err)
+	}
+
+	fmt.Printf("The file %v anf %v have been generated for you. \nPlease apply %v first as that creates the crd\n",
+		crdFilename, crdFilename, crdFilename)
 
 	return nil
 }

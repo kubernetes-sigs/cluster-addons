@@ -97,7 +97,8 @@ func main() {
 	}
 
 	if len(genericList.Items) == 0 {
-		fmt.Fprint(os.Stderr, "Please create a `Generic` resource\n")
+		fmt.Fprint(os.Stderr, "Yo need to define the addon that you want the controller to manager. Please create a" +
+			" `Generic` resource for the addon\n")
 		os.Exit(1)
 	}
 
