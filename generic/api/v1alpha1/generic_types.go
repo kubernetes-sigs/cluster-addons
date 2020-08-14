@@ -4,9 +4,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
-
 // GenericSpec defines the desired state of Generic
 type GenericSpec struct {
 	ObjectKind ObjectKind `json:"objectKind"`
@@ -16,9 +13,6 @@ type GenericSpec struct {
 // GenericStatus defines the observed state of Generic
 type GenericStatus struct {
 	// addonv1alpha1.CommonStatus `json:",inline"`
-
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
 }
 
 // +kubebuilder:object:root=true

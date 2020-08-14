@@ -3,6 +3,7 @@
 # It should be run by config/default
 resources:
 - bases/addons.x-k8s.io_generics.yaml
+- bases/app.k8s.io_application.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:
