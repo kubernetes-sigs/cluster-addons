@@ -1,0 +1,7 @@
+domain: x-k8s.io
+repo: sigs.k8s.io/cluster-addons/generic
+resources:
+- group: addons
+  kind: Generic
+  version: v1alpha1
+version: "2"

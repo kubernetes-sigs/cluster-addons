@@ -1,0 +1,11 @@
+apiVersion: addons.x-k8s.io/v1alpha1
+kind: Generic
+metadata:
+  name: generic-sample
+spec:
+  objectKind:
+    kind: NodeLocalDNS
+    version: "v1alpha1"
+    group: addons.x-k8s.io
+  channel: "../nodelocaldns/channels"
+

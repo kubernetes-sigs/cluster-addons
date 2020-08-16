@@ -1,12 +1,13 @@
-package main
+package convert
 
 import (
-	"golang.org/x/xerrors"
 	"io/ioutil"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
-	"os/exec"
+
+	"golang.org/x/xerrors"
 
 	"k8s.io/apimachinery/pkg/util/diff"
 )
@@ -46,7 +47,7 @@ func TestRBACGen(t *testing.T) {
 			continue
 		}
 
-		actualYAML, err := ParseYAMLtoRole(string(b))
+		actualYAML, err := ParseYAMLtoRole(string(b), "generated-role", "kube-system", "", false)
 		if err != nil {
 			t.Errorf("error parsing YAML %s: %v", p, err)
 			continue
@@ -77,7 +78,6 @@ func TestRBACGen(t *testing.T) {
 		}
 	}
 }
-
 
 // Had to copy out this func from kubebuider-declarative-pattern. Could we simply export it?
 func diffFiles(t *testing.T, expectedPath, actual string) error {
@@ -136,4 +136,3 @@ func diffFiles(t *testing.T, expectedPath, actual string) error {
 	t.Logf("Diff: expected - + actual\n%s", diff)
 	return nil
 }
-
