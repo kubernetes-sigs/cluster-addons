@@ -8,7 +8,7 @@ In this repository we explore ideas for all of the above. [Cluster addon operato
 
 With cluster addon operators, we are exploring a kubernetes-native way of managing addons using CRDs(Custom Resource Definitions) and controllers where the controllers encode how best to manage the addon. Installing and managing an addon could be as simple as creating a custom resource.
 
-We are also exploring other concept such as managing different simple addons with a single controller to reduce consumption of resources and make it dead simple to manage addons. We welcome you to create your own addon operators and try using the ones created by this community.
+We are also exploring other concepts such as managing different simple addons with a single controller to reduce consumption of resources and make it dead simple to manage addons. We welcome you to create your own addon operators and try using the ones created by this community.
 
 ## Frequently asked questions
 
