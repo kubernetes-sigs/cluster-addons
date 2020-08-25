@@ -33,7 +33,7 @@ echo "****** Testing Flannel Operator ******"
 make test -C flannel
 
 echo "****** Testing Kube-Proxy Operator ******"
-make test -C kubeproxy
+KUBERNETES_SERVICE_HOST= make test -C kubeproxy
 
 echo "****** Testing Metrics-server Operator ******"
 make test -C metrics-server
