@@ -31,3 +31,6 @@ make test -C dashboard
 
 echo "****** Testing Metrics-server Operator ******"
 make test -C metrics-server
+
+echo "****** Testing Bootstrap Utility ******"
+make test -C bootstrap
