@@ -28,6 +28,7 @@ type FlannelStatus struct {
 // +kubebuilder:object:root=true
 
 // Flannel is the Schema for the flannels API
+// +kubebuilder:subresource:status
 type Flannel struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

@@ -31,6 +31,7 @@ type NodeLocalDNSStatus struct {
 // +kubebuilder:object:root=true
 
 // NodeLocalDNS is the Schema for the nodelocaldns API
+// +kubebuilder:subresource:status
 type NodeLocalDNS struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
