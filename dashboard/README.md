@@ -12,7 +12,7 @@ Versions:
 
 Stable version - `2.0.0`
 
-## Usuage
+## Usage
 1. Clone the cluster-addons
 ```
 go get https://github.com/kubernetes-sigs/cluster-addons
