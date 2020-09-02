@@ -124,7 +124,6 @@ func AddonManager(env func(key string) string) (*addonManager, error) {
 		return nil, err
 	}
 	am.clientset = c
-	fmt.Println("called", kubeconfigPath)
 
 	am.kubectl = am.kubectlExec
 	if addonPath := env("ADDON_PATH"); addonPath != "" {
@@ -193,7 +192,6 @@ func (m *addonManager) Run() error {
 }
 
 func (m *addonManager) waitForSystemServiceAccount() {
-	fmt.Println(m.clientset)
 	for {
 		sa, err := m.clientset.CoreV1().ServiceAccounts(systemNamespace).Get(context.Background(),"default",
 			metav1.GetOptions{})
