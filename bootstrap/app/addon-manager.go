@@ -19,6 +19,7 @@ package app
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -29,6 +30,9 @@ import (
 	"strings"
 	"time"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/klog/v2"
 )
 
@@ -88,6 +92,7 @@ type addonManager struct {
 	hostname             string
 	kubectlOpts          string
 	kubectlPath          string
+	clientset            *kubernetes.Clientset
 	leaderElection       bool
 	pruneWhitelistFlags  []string
 
@@ -105,6 +110,22 @@ func AddonManager(env func(key string) string) (*addonManager, error) {
 		kubectlPath:          "/usr/bin/kubectl",
 		leaderElection:       true,
 	}
+
+	kubeconfigPath := env("KUBECONFIG")
+	if kubeconfigPath == "" {
+		kubeconfigPath = "/Users/ama/.kube/config"
+	}
+	config, err := clientcmd.BuildConfigFromFlags("", kubeconfigPath)
+	if err != nil {
+		return nil, fmt.Errorf("error building config from kubeconfig %v: %v", kubeconfigPath, err)
+	}
+	c, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		return nil, err
+	}
+	am.clientset = c
+	fmt.Println("called", kubeconfigPath)
+
 	am.kubectl = am.kubectlExec
 	if addonPath := env("ADDON_PATH"); addonPath != "" {
 		am.addonPath = addonPath
@@ -172,17 +193,17 @@ func (m *addonManager) Run() error {
 }
 
 func (m *addonManager) waitForSystemServiceAccount() {
-	var out, errOut bytes.Buffer
+	fmt.Println(m.clientset)
 	for {
-		err := m.kubectl(&out, &errOut, m.kubectlOpts, "get", "-n", systemNamespace, "serviceaccount", "default", "-o", "go-template={{with index .secrets 0}}{{.name}}{{end}}")
-		if errStr := errOut.String(); errStr != "" {
-			klog.Warning(errStr)
+		sa, err := m.clientset.CoreV1().ServiceAccounts(systemNamespace).Get(context.Background(),"default",
+			metav1.GetOptions{})
+		if err != nil {
+			klog.Warning(err)
 		}
-		if err == nil && out.String() != "" {
+		if err == nil && len(sa.Secrets) > 0 && sa.Secrets[0].Name  != "" {
 			return
 		}
-		out.Reset()
-		errOut.Reset()
+
 		time.Sleep(500 * time.Millisecond)
 	}
 }
