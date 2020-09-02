@@ -21,10 +21,10 @@ jobs:
 
       - name: Verify no changes from goimports
         run: |
-        if [ -n "$(git status --porcelain)" ]; then
-          git status    # These are the files that failed to pass the check.
-          exit 1
-        fi
+          if [ -n "$(git status --porcelain)" ]; then
+            git status    # These are the files that failed to pass the check.
+            exit 1
+          fi
 
   verify-gomod:
     runs-on: ubuntu-latest
@@ -42,7 +42,7 @@ jobs:
 
       - name: Verify no changes from goimports and go mod tidy.
         run: |
-        if [ -n "$(git status --porcelain)" ]; then
-          git status    # These are the files that failed to pass the check.
-          exit 1
-        fi
+          if [ -n "$(git status --porcelain)" ]; then
+            git status    # These are the files that failed to pass the check.
+            exit 1
+          fi
