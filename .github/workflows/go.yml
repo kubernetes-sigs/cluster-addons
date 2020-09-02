@@ -38,7 +38,7 @@ jobs:
       - name: Check code
         uses: actions/checkout@v2
 
-      run: find . -name go.mod -execdir go mod tidy \;
+      - run: find . -name go.mod -execdir go mod tidy \;
 
       - name: Verify no changes from goimports and go mod tidy.
         run: |
