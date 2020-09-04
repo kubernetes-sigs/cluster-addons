@@ -66,6 +66,7 @@ func (o *Dashboard) SetCommonStatus(s addonv1alpha1.CommonStatus) {
 // +kubebuilder:object:root=true
 
 // DashboardList contains a list of Dashboard
+// +kubebuilder:subresource:status
 type DashboardList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`

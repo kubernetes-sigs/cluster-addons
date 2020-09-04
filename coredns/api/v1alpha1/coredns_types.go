@@ -39,6 +39,7 @@ type CoreDNSStatus struct {
 // +kubebuilder:object:root=true
 
 // CoreDNS is the Schema for the coredns API
+// +kubebuilder:subresource:status
 type CoreDNS struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

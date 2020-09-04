@@ -43,6 +43,7 @@ type MetricsServerStatus struct {
 // +kubebuilder:object:root=true
 
 // MetricsServer is the Schema for the metricsservers API
+// +kubebuilder:subresource:status
 type MetricsServer struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

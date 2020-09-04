@@ -15,6 +15,8 @@ spec:
     plural: metricsservers
     singular: metricsserver
   scope: Namespaced
+  subresources:
+    status: {}
   validation:
     openAPIV3Schema:
       description: MetricsServer is the Schema for the metricsservers API

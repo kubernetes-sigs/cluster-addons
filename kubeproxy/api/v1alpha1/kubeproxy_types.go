@@ -23,6 +23,7 @@ type KubeProxyStatus struct {
 // +kubebuilder:object:root=true
 
 // KubeProxy is the Schema for the  API
+// +kubebuilder:subresource:status
 type KubeProxy struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
