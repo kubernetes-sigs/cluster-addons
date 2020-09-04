@@ -15,9 +15,11 @@ spec:
     plural: nodelocaldns
     singular: nodelocaldns
   scope: Namespaced
+  subresources:
+    status: {}
   validation:
     openAPIV3Schema:
-      description: nodelocaldns is the Schema for the nodelocaldns API
+      description: NodeLocalDNS is the Schema for the nodelocaldns API
       properties:
         apiVersion:
           description: 'APIVersion defines the versioned schema of this representation
@@ -32,7 +34,7 @@ spec:
         metadata:
           type: object
         spec:
-          description: nodelocaldnsSpec defines the desired state of nodelocaldns
+          description: NodeLocalDNSSpec defines the desired state of NodeLocalDNS
           properties:
             channel:
               description: 'Channel specifies a channel that can be used to resolve
@@ -56,7 +58,7 @@ spec:
               type: string
           type: object
         status:
-          description: nodelocaldnsStatus defines the observed state of nodelocaldns
+          description: NodeLocalDNSStatus defines the observed state of NodeLocalDNS
           properties:
             errors:
               items:

@@ -18,6 +18,7 @@ type GenericStatus struct {
 // +kubebuilder:object:root=true
 
 // Generic is the Schema for the generics API
+// +kubebuilder:subresource:status
 type Generic struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
