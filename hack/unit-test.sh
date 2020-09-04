@@ -29,8 +29,17 @@ make test -C coredns
 echo "****** Testing Dashboard Operator ******"
 make test -C dashboard
 
+echo "****** Testing Flannel Operator ******"
+make test -C flannel
+
+echo "****** Testing Kube-Proxy Operator ******"
+KUBERNETES_SERVICE_HOST= make test -C kubeproxy
+
 echo "****** Testing Metrics-server Operator ******"
 make test -C metrics-server
 
 echo "****** Testing Bootstrap Utility ******"
 make test -C bootstrap
+
+echo "****** Testing Node-Local-DNS Operator ******"
+make test -C nodelocaldns
