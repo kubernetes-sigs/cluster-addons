@@ -92,7 +92,7 @@ type addonManager struct {
 	hostname             string
 	kubectlOpts          string
 	kubectlPath          string
-	clientset            *kubernetes.Clientset
+	clientset            kubernetes.Interface
 	leaderElection       bool
 	pruneWhitelistFlags  []string
 
@@ -193,12 +193,12 @@ func (m *addonManager) Run() error {
 
 func (m *addonManager) waitForSystemServiceAccount() {
 	for {
-		sa, err := m.clientset.CoreV1().ServiceAccounts(systemNamespace).Get(context.Background(),"default",
+		sa, err := m.clientset.CoreV1().ServiceAccounts(systemNamespace).Get(context.Background(), "default",
 			metav1.GetOptions{})
 		if err != nil {
 			klog.Warning(err)
 		}
-		if err == nil && len(sa.Secrets) > 0 && sa.Secrets[0].Name  != "" {
+		if err == nil && len(sa.Secrets) > 0 && sa.Secrets[0].Name != "" {
 			return
 		}
 

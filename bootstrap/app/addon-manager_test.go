@@ -17,6 +17,7 @@ package app
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -24,6 +25,10 @@ import (
 	"reflect"
 	"testing"
 	"time"
+
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes/fake"
 )
 
 func TestIsLeader(t *testing.T) {
@@ -179,7 +184,7 @@ func TestAddonManager(t *testing.T) {
 			if am.clientset == nil {
 				t.Error("AddonManager() returned an addon manager without a kubernetes clientset.")
 			}
-			am.kubectl = nil // set function var to nil so that DeepEqual can work
+			am.kubectl = nil   // set function var to nil so that DeepEqual can work
 			am.clientset = nil // set clientset to nil that DeepEqual can work
 			if !reflect.DeepEqual(tc.expected, am) {
 				t.Errorf("AddonManager() returned %#v, wanted %#v", tc.expected, am)
@@ -289,60 +294,71 @@ func TestWaitForSystemServiceAccount(t *testing.T) {
 	t.Parallel()
 	testHostname := "test-instance"
 	testKubectlOpts := "--kubeconfig=/some/dir/kubeconfig.json"
-	expectedKubectlArgs := []string{testKubectlOpts, "get", "-n", "kube-system", "serviceaccount", "default", "-o", "go-template={{with index .secrets 0}}{{.name}}{{end}}"}
+	//expectedKubectlArgs := []string{testKubectlOpts, "get", "-n", "kube-system", "serviceaccount", "default", "-o", "go-template={{with index .secrets 0}}{{.name}}{{end}}"}
 	tcs := []struct {
 		desc        string
-		kubectlOuts []string
+		sa          *corev1.ServiceAccount
 		kubectlErrs []error
-
-		expectedAttempts int
+		doneWaiting bool
 	}{
 		{
-			desc:             "happy case",
-			kubectlOuts:      []string{"service-account-t0ken"},
-			expectedAttempts: 1,
+			desc: "happy case",
+			//kubectlOuts:      []string{"service-account-t0ken"},
+			doneWaiting: true,
+			sa: &corev1.ServiceAccount{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "default",
+					Namespace: "kube-system",
+				},
+				Secrets: []corev1.ObjectReference{
+					{
+						Name: "service-account-t0ken",
+					},
+				},
+			},
 		},
 		{
-			desc:             "wait for token",
-			kubectlOuts:      []string{"", "", "service-account-t0ken"},
-			expectedAttempts: 3,
+			desc:        "wait for token",
+			doneWaiting: false,
+			sa: &corev1.ServiceAccount{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "default",
+					Namespace: "kube-system",
+				},
+				Secrets: []corev1.ObjectReference{
+					{
+						Name: "",
+					},
+				},
+			},
 		},
-		{
-			desc:             "retry on error",
-			kubectlOuts:      []string{"", "service-account-t0ken"},
-			kubectlErrs:      []error{errors.New("exit status: 1")},
-			expectedAttempts: 2,
-		},
+		//{
+		//	desc:             "retry on error",
+		//	//kubectlOuts:      []string{"", "service-account-t0ken"},
+		//	kubectlErrs:      []error{errors.New("exit status: 1")},
+		//	expectedAttempts: 2,
+		//},
 	}
 
 	for _, tc := range tcs {
 		tc := tc
 		t.Run(tc.desc, func(t *testing.T) {
 			t.Parallel()
-			numAttempts := 0
+			var doneWaiting bool
 			am := &addonManager{
 				hostname:    testHostname,
 				kubectlOpts: testKubectlOpts,
-				kubectl: func(stdout, stderr io.Writer, args ...string) error {
-					numAttempts++
-					if !reflect.DeepEqual(expectedKubectlArgs, args) {
-						t.Errorf("incorrect args passed to kubectl. Wanted: %#v, Got: %#v", expectedKubectlArgs, args)
-					}
-					if len(tc.kubectlOuts) > 0 {
-						io.WriteString(stdout, tc.kubectlOuts[0])
-						tc.kubectlOuts = tc.kubectlOuts[1:]
-					}
-					if len(tc.kubectlErrs) > 0 {
-						err := tc.kubectlErrs[0]
-						tc.kubectlErrs = tc.kubectlErrs[1:]
-						return err
-					}
-					return nil
-				},
+				clientset:   fake.NewSimpleClientset(tc.sa),
 			}
-			am.waitForSystemServiceAccount()
-			if tc.expectedAttempts != numAttempts {
-				t.Errorf("waitForSystemServiceAccount() made %d attempts to wait for the kube-system service account, expected %d", numAttempts, tc.expectedAttempts)
+			go func() {
+				am.waitForSystemServiceAccount() // blocking code
+				fmt.Println("here")
+				doneWaiting = true
+			}()
+
+			time.Sleep(1 * time.Second)
+			if doneWaiting != tc.doneWaiting {
+				t.Errorf("Expected function to wait for serviceaccount, %v", tc.sa.Secrets[0].Name)
 			}
 		})
 	}
