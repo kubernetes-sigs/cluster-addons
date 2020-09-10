@@ -113,7 +113,7 @@ func AddonManager(env func(key string) string) (*addonManager, error) {
 
 	kubeconfigPath := env("KUBECONFIG")
 	if kubeconfigPath == "" {
-		kubeconfigPath = "/Users/ama/.kube/config"
+		kubeconfigPath = fmt.Sprintf("%v/.kube/config", os.Getenv("Home"))
 	}
 	config, err := clientcmd.BuildConfigFromFlags("", kubeconfigPath)
 	if err != nil {
