@@ -92,6 +92,7 @@ type addonManager struct {
 	hostname             string
 	kubectlOpts          string
 	kubectlPath          string
+	kubeconfig           string
 	clientset            kubernetes.Interface
 	leaderElection       bool
 	pruneWhitelistFlags  []string
@@ -111,19 +112,10 @@ func AddonManager(env func(key string) string) (*addonManager, error) {
 		leaderElection:       true,
 	}
 
-	kubeconfigPath := env("KUBECONFIG")
-	if kubeconfigPath == "" {
-		kubeconfigPath = fmt.Sprintf("%v/.kube/config", os.Getenv("Home"))
+	am.kubeconfig = env("KUBECONFIG")
+	if am.kubeconfig == "" {
+		am.kubeconfig = fmt.Sprintf("%v/.kube/config", os.Getenv("HOME"))
 	}
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfigPath)
-	if err != nil {
-		return nil, fmt.Errorf("error building config from kubeconfig %v: %v", kubeconfigPath, err)
-	}
-	c, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		return nil, err
-	}
-	am.clientset = c
 
 	am.kubectl = am.kubectlExec
 	if addonPath := env("ADDON_PATH"); addonPath != "" {
@@ -148,6 +140,23 @@ func AddonManager(env func(key string) string) (*addonManager, error) {
 	}
 	am.pruneWhitelistFlags = makePruneWhitelistFlags(env)
 	return am, nil
+}
+
+func (am *addonManager) Clientset() (kubernetes.Interface, error) {
+	if am.clientset != nil {
+		return am.clientset, nil
+	}
+
+	config, err := clientcmd.BuildConfigFromFlags("", am.kubeconfig)
+	if err != nil {
+		return nil, fmt.Errorf("error building config from kubeconfig %v: %v", am.kubeconfig, err)
+	}
+	c, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		return nil, err
+	}
+	am.clientset = c
+	return c, nil
 }
 
 // makePruneWhitelistFlags generates kubectl prune-whitelist flags from provided environment variables.
@@ -193,7 +202,14 @@ func (m *addonManager) Run() error {
 
 func (m *addonManager) waitForSystemServiceAccount() {
 	for {
-		sa, err := m.clientset.CoreV1().ServiceAccounts(systemNamespace).Get(context.Background(), "default",
+		clientset, err := m.Clientset()
+		if err != nil {
+			klog.Warningf("error creating kubernetes client: %v", err)
+			time.Sleep(500 * time.Millisecond)
+			continue
+		}
+
+		sa, err := clientset.CoreV1().ServiceAccounts(systemNamespace).Get(context.Background(), "default",
 			metav1.GetOptions{})
 		if err != nil {
 			klog.Warning(err)

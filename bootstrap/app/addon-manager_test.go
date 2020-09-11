@@ -181,11 +181,11 @@ func TestAddonManager(t *testing.T) {
 			if am.kubectl == nil {
 				t.Error("AddonManager() returned an addon manager without `kubectl` implementation.")
 			}
-			if am.clientset == nil {
-				t.Error("AddonManager() returned an addon manager without a kubernetes clientset.")
+			if am.kubeconfig == "" {
+				t.Error("AddonManager() returned an addon manager without a kubeconfig path.")
 			}
 			am.kubectl = nil   // set function var to nil so that DeepEqual can work
-			am.clientset = nil // set clientset to nil that DeepEqual can work
+			am.kubeconfig = "" // set kubeconfig to "" that DeepEqual can work
 			if !reflect.DeepEqual(tc.expected, am) {
 				t.Errorf("AddonManager() returned %#v, wanted %#v", tc.expected, am)
 			}
