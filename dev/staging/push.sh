@@ -26,5 +26,5 @@ fi
 
 # Build addon bootstrap image
 pushd bootstrap
-IMG=gcr.io/k8s-staging-cluster-api/cluster-addons-bootstrap:${VERSION} make docker-image
+IMG=gcr.io/k8s-staging-cluster-api/cluster-addons-bootstrap:${VERSION} make docker-push
 popd
