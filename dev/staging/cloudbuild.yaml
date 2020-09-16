@@ -6,10 +6,10 @@ steps:
 - name: gcr.io/k8s-testimages/krte:latest-master
   env:
   - PULL_BASE_REF=$_PULL_BASE_REF
+  - VERSION=$_GIT_TAG
   entrypoint: dev/staging/push.sh
 substitutions:
-  _GIT_TAG: '12345'
+  _GIT_TAG: 'dev'
   _PULL_BASE_REF: 'dev'
   _DOCKER_REGISTRY: 'gcr.io'
   _DOCKER_IMAGE_PREFIX: 'k8s-staging-cluster-addons/'
-

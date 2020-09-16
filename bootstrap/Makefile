@@ -28,6 +28,9 @@ docker-image:
   # BuildKit requires Docker >= 18.09
 	DOCKER_BUILDKIT=1 docker build --platform=linux/$(ARCH) . -t $(IMG)
 
+docker-push: docker-image
+	docker push $(IMG)
+
 fmt:
 	go fmt ./...
 

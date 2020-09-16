@@ -20,7 +20,11 @@ set -x;
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "${REPO_ROOT}"
 
+if [[ -z "${VERSION}" ]]; then
+  VERSION=$(git describe --always)
+fi
+
 # Build addon bootstrap image
 pushd bootstrap
-make docker-image
+IMG=gcr.io/k8s-staging-cluster-api/cluster-addons-bootstrap:${VERSION} make docker-push
 popd
