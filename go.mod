@@ -3,7 +3,6 @@ module github.com/kubernetes-sigs/cluster-addons
 go 1.13
 
 require (
-	github.com/gobuffalo/flect v0.2.1
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
 	github.com/googleapis/gnostic v0.3.1 // indirect
 	github.com/imdario/mergo v0.3.6 // indirect
