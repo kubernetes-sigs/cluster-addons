@@ -1,0 +1,50 @@
+name: Golang CI
+
+'on':
+  - push
+  - pull_request
+
+jobs:
+  verify-goimports:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.15
+          stable: true
+
+      - name: Install goimports
+        run: go get golang.org/x/tools/cmd/goimports
+
+      - name: Check code
+        uses: actions/checkout@v2
+      - run: goimports -w $(find . -type f -name '*.go' -not -path "*/vendor/*")
+
+      - name: Verify no changes from goimports
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            git status    # These are the files that failed to pass the check.
+            exit 1
+          fi
+
+  verify-gomod:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.15
+          stable: true
+
+      - name: Check code
+        uses: actions/checkout@v2
+
+      - run: find . -name go.mod -execdir go mod tidy \;
+
+      - name: Verify no changes from goimports and go mod tidy.
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            git status    # These are the files that failed to pass the check.
+            exit 1
+          fi
