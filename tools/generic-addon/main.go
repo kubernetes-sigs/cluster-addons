@@ -74,8 +74,8 @@ func run() error {
 		allRbac = allRbac + rbac + "\n---\n"
 	}
 
-	crdFilename := lower+"_"+"crd_rbac.yaml"
-	crFilename := lower+"_"+"sample.yaml"
+	crdFilename := lower + "_" + "crd_rbac.yaml"
+	crFilename := lower + "_" + "sample.yaml"
 
 	crdRBACStr := addonCRD + crdRBAC + genericYaml + allRbac
 	sampleCRStr := sampleYAML

@@ -4,12 +4,13 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/client-go/dynamic"
 	"os"
 	"path/filepath"
 	"strings"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/dynamic"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/client-go/discovery"
@@ -79,7 +80,7 @@ func run(kubeconfig *string) error {
 	return nil
 }
 
-func PrintResource(c dynamic.Interface, resource schema.GroupVersionResource, kind, name string) error{
+func PrintResource(c dynamic.Interface, resource schema.GroupVersionResource, kind, name string) error {
 	listOpts := metav1.ListOptions{}
 	resourceList, err := c.Resource(resource).Namespace(*ns).List(context.Background(), listOpts)
 	if err != nil {
