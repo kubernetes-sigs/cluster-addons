@@ -24,7 +24,15 @@ if [[ -z "${VERSION}" ]]; then
   VERSION=$(git describe --always)
 fi
 
+if [[ -z "${DOCKER_REGISTRY}" ]]; then
+  DOCKER_REGISTRY=gcr.io
+fi
+
+if [[ -z "${DOCKER_IMAGE_PREFIX}" ]]; then
+  DOCKER_IMAGE_PREFIX=k8s-staging-cluster-api/
+fi
+
 # Build addon bootstrap image
 pushd bootstrap
-IMG=gcr.io/k8s-staging-cluster-api/cluster-addons-bootstrap:${VERSION} make docker-push
+  IMG=${DOCKER_REGISTRY}/${DOCKER_IMAGE_PREFIX}cluster-addons-bootstrap:${VERSION} make docker-push
 popd
