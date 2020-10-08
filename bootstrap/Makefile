@@ -24,6 +24,11 @@ build:
 	CGO_ENABLED=0 GOARCH=$(ARCH) GO111MODULE=on go build -o cluster-addons-bootstrap main.go
 
 docker-image:
+  # We must pre-pull images https://github.com/moby/buildkit/issues/1271
+  # This also makes image building more understandable by avoiding a stale cache
+	docker pull docker.io/library/ubuntu:20.04
+	docker pull docker.io/library/golang:1.15
+
   # BuildKit is required for auto-population of `ARG TARGETARCH` during the build
   # BuildKit requires Docker >= 18.09
 	DOCKER_BUILDKIT=1 docker build --platform=linux/$(ARCH) . -t $(IMG)
