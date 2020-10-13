@@ -4,11 +4,13 @@ approvers:
   - dholbach
   - johnsonj
   - justinsb
+  - rajansandeep
   - stealthybox
   - sig-cluster-lifecycle-leads
 reviewers:
+  - atoato88
   - dholbach
   - johnsonj
   - justinsb
+  - rajansandeep
   - stealthybox
-  - atoato88
