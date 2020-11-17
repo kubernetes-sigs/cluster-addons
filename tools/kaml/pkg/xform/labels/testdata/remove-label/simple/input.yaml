@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    foo: bar
+    fooz: baz
+  name: example
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      foo: bar
+      fooz: baz
+  template:
+    metadata:
+      labels:
+        foo: bar
+        fooz: baz
+    spec:
+      containers:
+      - image: example
+        name: main
