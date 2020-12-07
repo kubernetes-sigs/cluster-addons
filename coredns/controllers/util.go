@@ -130,6 +130,7 @@ func getCorefile(ctx context.Context, c client.Client) (string, error) {
 	}
 
 	if apierrors.IsNotFound(err) {
+		klog.Infof("CoreDNS deployment not found")
 		// If the CoreDNS Deployment isn't found, it is assumed that it is a new install
 		// of CoreDNS and we proceed to use the default Corefile
 		return "", nil
@@ -145,6 +146,11 @@ func getCorefile(ctx context.Context, c client.Client) (string, error) {
 		}
 	}
 
+	if configMapName == "" {
+		klog.Infof("CoreDNS deployment did not have config-volume")
+		return "", nil
+	}
+
 	// Get the CoreDNS ConfigMap
 	coreDNSConfigMap, err := getCoreDNSConfigMap(ctx, c, configMapName)
 	if err != nil && !apierrors.IsNotFound(err) {
@@ -153,14 +159,18 @@ func getCorefile(ctx context.Context, c client.Client) (string, error) {
 
 	if apierrors.IsNotFound(err) {
 		// If the CoreDNS ConfigMap isn't found, use the default Corefile
+		klog.Infof("CoreDNS deployment had config-volume %q, but it was not found", configMapName)
 		return "", nil
 	}
 
 	// Get the Corefile
 	corefile, ok := coreDNSConfigMap.Data["Corefile"]
 	if !ok {
+		klog.Infof("CoreDNS deployment had ConfigMap %q, but it did not have a Corefile entry", configMapName)
 		return "", errors.New("unable to find the CoreDNS Corefile data")
 	}
+	klog.Infof("Found corefile: %q", corefile)
+
 	return corefile, nil
 }
 
@@ -181,8 +191,16 @@ func corefileMigration(ctx context.Context, c client.Client, coreDNSVersion, cor
 			coreDNSImage = container.Image
 		}
 	}
+	if coreDNSImage == "" {
+		klog.Warningf("unable to find coredns container (%q) in pod", coreDNSName)
+	}
+
 	coreDNSImageParts := strings.Split(coreDNSImage, ":")
 	currentCoreDNSVersion := coreDNSImageParts[len(coreDNSImageParts)-1]
+
+	if currentCoreDNSVersion == "" {
+		klog.Warningf("cannot extract coredns version from %q", coreDNSImage)
+	}
 
 	if currentCoreDNSVersion != coreDNSVersion {
 		// Check if Corefile Migration is necessary and get the migrated Corefile

@@ -100,6 +100,9 @@ func defineCoreDNSResources() (*corev1.ConfigMap, *corev1.Service, *appsv1.Deplo
 		Spec: appsv1.DeploymentSpec{
 			Template: corev1.PodTemplateSpec{
 				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{Name: "coredns", Image: "k8s.gcr.io/coredns:1.7.0"}, // Note that this is used by the corefile upgrade logic
+					},
 					Volumes: []corev1.Volume{
 						{Name: "config-volume", VolumeSource: corev1.VolumeSource{ConfigMap: &corev1.ConfigMapVolumeSource{LocalObjectReference: corev1.LocalObjectReference{Name: "coredns-xxxxxxxx"}}}},
 					},
