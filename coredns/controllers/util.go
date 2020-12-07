@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"regexp"
 	"strings"
@@ -33,15 +34,22 @@ import (
 	"github.com/pkg/errors"
 )
 
-// getCoreDNSService fetches the CoreDNS Service
-func getCoreDNSService(ctx context.Context, c client.Client) (*corev1.Service, error) {
-	kubernetesService := &corev1.Service{}
+// getKubernetesService fetches the kube-system/kubernetes Service
+func getKubernetesService(ctx context.Context, c client.Client) (*corev1.Service, error) {
+	service := &corev1.Service{}
 	id := client.ObjectKey{Namespace: metav1.NamespaceDefault, Name: "kubernetes"}
 
-	// Get the CoreDNS Service
-	err := c.Get(ctx, id, kubernetesService)
+	err := c.Get(ctx, id, service)
+	return service, err
+}
 
-	return kubernetesService, err
+// getKubeDNSService fetches the kube-system/kube-dns Service
+func getKubeDNSService(ctx context.Context, c client.Client) (*corev1.Service, error) {
+	service := &corev1.Service{}
+	id := client.ObjectKey{Namespace: "kube-system", Name: "kube-dns"}
+
+	err := c.Get(ctx, id, service)
+	return service, err
 }
 
 // getCoreDNSConfigMap fetches the CoreDNS ConfigMap
@@ -70,14 +78,28 @@ func getCoreDNSDeployment(ctx context.Context, c client.Client) (*appsv1.Deploym
 // It is usually the 10th address to the Kubernetes Service Cluster IP
 // If the Kubernetes Service Cluster IP is not found, we default it to be "10.96.0.10"
 func findDNSClusterIP(ctx context.Context, c client.Client) (string, error) {
-	kubernetesService, err := getCoreDNSService(ctx, c)
-	if err != nil && !apierrors.IsNotFound(err) {
-		return "", err
+	kubeDNSService, err := getKubeDNSService(ctx, c)
+	if err != nil {
+		if !apierrors.IsNotFound(err) {
+			return "", err
+		}
+	} else {
+		ip := net.ParseIP(kubeDNSService.Spec.ClusterIP)
+		if ip == nil {
+			return "", fmt.Errorf("cannot parse kube-dns ClusterIP %q", kubeDNSService.Spec.ClusterIP)
+		}
+
+		klog.Infof("using existing ClusterIP for kube-dns service: %v", ip)
+		return ip.String(), nil
 	}
 
-	if apierrors.IsNotFound(err) {
-		// If it cannot determine the Cluster IP, we default it to "10.96.0.10"
-		return coreDNSIP, nil
+	kubernetesService, err := getKubernetesService(ctx, c)
+	if err != nil {
+		if apierrors.IsNotFound(err) {
+			// If it cannot determine the Cluster IP, we default it to "10.96.0.10"
+			return coreDNSIP, nil
+		}
+		return "", err
 	}
 
 	ip := net.ParseIP(kubernetesService.Spec.ClusterIP)
