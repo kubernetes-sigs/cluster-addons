@@ -12,8 +12,9 @@ cd dashboard
 ```bash
 export KUBEBUILDER_ENABLE_PLUGINS=1
 kubebuilder init --fetch-deps=false --domain=x-k8s.io --license=apache2
-kubebuilder create api --pattern=addon --controller=true --example=false --group=addons --kind=Dashboard --make=false
- --namespaced=true --resource=true --version=v1alpha1
+kubebuilder create api --pattern=addon --controller=true --example=false \
+   --group=addons --kind=Dashboard --make=false \
+   --namespaced=true --resource=true --version=v1alpha1
 ```
 
 ## 3. Run go mod vendor:
