@@ -89,7 +89,7 @@ func replaceVariables(mgr ctrl.Manager) declarative.ManifestOperation {
 		o := object.(*api.NodeLocalDNS)
 		kubeProxyMode, err := findKubeProxyMode(ctx, mgr.GetClient())
 		if err != nil {
-			klog.Warningf("error determining kube-proxy mode, defaulting to iptables: %v", err)
+			klog.InfoS("error determining kube-proxy mode, defaulting to iptables", "err", err)
 		}
 
 		// TODO: port findClusterIP and getDNSDomain from coredns/controllers/utils in the kubebuilder-declarative

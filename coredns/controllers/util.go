@@ -91,7 +91,7 @@ func findDNSClusterIP(ctx context.Context, c client.Client) (string, error) {
 	ip[len(ip)-1] += 9
 
 	result := ip.String()
-	klog.Infof("determined ClusterIP for CoreDNS should be %q", result)
+	klog.InfoS("determined ClusterIP for CoreDNS should be", "result", result)
 	return result, nil
 }
 
@@ -104,14 +104,14 @@ func getDNSDomain() string {
 	cname, err := net.LookupCNAME(svc)
 	if err != nil {
 		// If it cannot determine the domain, we default it to "cluster.local"
-		klog.Infof("determined DNS Domain for CoreDNS should be %q", coreDNSDomain)
+		klog.InfoS("determined DNS Domain for CoreDNS should be", "coreDNSDomain", coreDNSDomain)
 		return coreDNSDomain
 	}
 
 	domain := strings.TrimPrefix(cname, svc)
 	domain = strings.TrimSuffix(coreDNSDomain, ".")
 
-	klog.Infof("determined DNS Domain for CoreDNS should be %q", domain)
+	klog.InfoS("determined DNS Domain for CoreDNS should be", "domain", domain)
 
 	return domain
 }
@@ -188,18 +188,18 @@ func corefileMigration(ctx context.Context, c client.Client, coreDNSVersion, cor
 		// Check if Corefile Migration is necessary and get the migrated Corefile
 		// If the Corefile from the previous version is untouched, we can proceed to replace it with the
 		// Corefile of the current version
-		klog.Infof("from: %q  to: %q", currentCoreDNSVersion, coreDNSVersion)
+		klog.InfoS("from currentCoreDNSVersion to coreDNSVersion", "from", currentCoreDNSVersion, "to", coreDNSVersion)
 		isDefault := migration.Default("", corefile)
 		switch isDefault {
 		case true:
 			corefile = ""
-			klog.Infof("the default Corefile will be applied")
+			klog.InfoS("the default Corefile will be applied")
 		case false:
 			corefile, err = performMigrationOfCorefile(ctx, c, corefile, currentCoreDNSVersion, coreDNSVersion)
 			if err != nil {
 				return "", errors.Errorf("unable to migrate the CoreDNS Corefile data: %v", err)
 			}
-			klog.Infof("determined Corefile for CoreDNS should be %q", corefile)
+			klog.InfoS("determined Corefile for CoreDNS should be", "corefile", corefile)
 		}
 	}
 	return corefile, nil
@@ -219,19 +219,19 @@ func performMigrationOfCorefile(ctx context.Context, c client.Client, corefile, 
 	// Checks if the CoreDNS version is officially supported
 	isVersionSupported, err := isCoreDNSVersionSupported(ctx, c)
 	if !isVersionSupported {
-		klog.Warningf("the CoreDNS Configuration will not be migrated due to unsupported version of CoreDNS. " +
+		klog.InfoS("the CoreDNS Configuration will not be migrated due to unsupported version of CoreDNS. " +
 			"The existing CoreDNS Corefile configuration and deployment has been retained.")
 		return corefile, err
 	}
 
 	migratedCorefile, err := migration.Migrate(fromVersion, toVersion, corefile, false)
 	if err != nil {
-		klog.Warningf("the CoreDNS Configuration was not migrated: %v. The existing CoreDNS Corefile configuration has been retained.", err)
+		klog.InfoS("the CoreDNS Configuration was not migrated: %v. The existing CoreDNS Corefile configuration has been retained.", "err", err)
 		return corefile, err
 	}
 
 	// show the migration changes
-	klog.Infof("the CoreDNS configuration has been migrated and applied: %v.", migratedCorefile)
+	klog.InfoS("the CoreDNS configuration has been migrated and applied: %v.", "migratedCorefile", migratedCorefile)
 
 	return migratedCorefile, nil
 }
