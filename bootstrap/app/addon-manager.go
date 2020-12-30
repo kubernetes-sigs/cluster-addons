@@ -138,7 +138,7 @@ func makePruneWhitelistFlags(env func(key string) string) []string {
 	}
 	pwf := appendPruneWhitelistFlags(nil, pw)
 	pwf = appendPruneWhitelistFlags(pwf, strings.Fields(env("KUBECTL_EXTRA_PRUNE_WHITELIST")))
-	klog.Infof("== Generated kubectl prune whitelist flags: %s ==", strings.Join(pwf, " "))
+	klog.InfoS("== Generated kubectl prune whitelist flags:",strings.Join(pwf, " "),"==" )
 	return pwf
 }
 
@@ -204,7 +204,7 @@ func (m *addonManager) ensureDefaultAdmissionControlsObjects() error {
 					filterLog(&out, "", klog.Info)
 					filterLog(&errOut, "", klog.Warning)
 					if err == nil {
-						klog.Infof("== Successfully started %s in namespace default ==", path)
+						klog.InfoS("== Successfully started ",path," in namespace default ==" )
 						return nil
 					}
 					klog.Warningf("== Failed to start %s in namespace default. %d tries remaining. ==", path, attemptsRemaining-1)
