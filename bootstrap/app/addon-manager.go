@@ -154,7 +154,7 @@ func (m *addonManager) Run() error {
 	m.waitForSystemServiceAccount()
 	if err := m.ensureDefaultAdmissionControlsObjects(); err != nil {
 		if os.IsNotExist(err) {
-			klog.Warningf("Admissions control object directory not found: %v", err)
+			klog.InfoS("Admissions control object directory not found", err)
 		} else {
 			klog.Errorf("Could not create admissions control objects: %v", err)
 		}
@@ -207,7 +207,7 @@ func (m *addonManager) ensureDefaultAdmissionControlsObjects() error {
 						klog.Infof("== Successfully started %s in namespace default ==", path)
 						return nil
 					}
-					klog.Warningf("== Failed to start %s in namespace default. %d tries remaining. ==", path, attemptsRemaining-1)
+					klog.InfoS("== Failed to start ",path," in namespace default. ", attemptsRemaining-1," tries remaining. ==")
 					if attemptsRemaining > 1 {
 						time.Sleep(startAddonRetryDelay)
 					}

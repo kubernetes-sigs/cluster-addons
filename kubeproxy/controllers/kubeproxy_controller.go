@@ -193,7 +193,7 @@ func OverrideApiserver(ctx context.Context, o declarative.DeclarativeObject, man
 			}
 			if master == "" {
 				master = "kubernetes-master"
-				klog.Warningf("using fallback for KUBERNETES_SERVICE_HOST: %v", master)
+				klog.InfoS("using fallback for KUBERNETES_SERVICE_HOST:", master)
 			}
 			port := os.Getenv("KUBERNETES_SERVICE_PORT")
 			if port == "" {

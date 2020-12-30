@@ -219,14 +219,14 @@ func performMigrationOfCorefile(ctx context.Context, c client.Client, corefile, 
 	// Checks if the CoreDNS version is officially supported
 	isVersionSupported, err := isCoreDNSVersionSupported(ctx, c)
 	if !isVersionSupported {
-		klog.Warningf("the CoreDNS Configuration will not be migrated due to unsupported version of CoreDNS. " +
+		klog.InfoS("the CoreDNS Configuration will not be migrated due to unsupported version of CoreDNS. " +
 			"The existing CoreDNS Corefile configuration and deployment has been retained.")
 		return corefile, err
 	}
 
 	migratedCorefile, err := migration.Migrate(fromVersion, toVersion, corefile, false)
 	if err != nil {
-		klog.Warningf("the CoreDNS Configuration was not migrated: %v. The existing CoreDNS Corefile configuration has been retained.", err)
+		klog.InfoS("the CoreDNS Configuration was not migrated: ", err ,". The existing CoreDNS Corefile configuration has been retained.")
 		return corefile, err
 	}
 
