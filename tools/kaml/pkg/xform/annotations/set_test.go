@@ -1,4 +1,4 @@
-package labels
+package annotations
 
 import (
 	"io/ioutil"
@@ -8,8 +8,8 @@ import (
 	"sigs.k8s.io/cluster-addons/tools/kaml/pkg/testutils"
 )
 
-func TestRemoveLabels(t *testing.T) {
-	baseDir := "testdata/remove-label"
+func TestSetAnnotations(t *testing.T) {
+	baseDir := "testdata/set-annotations"
 	dirs, err := ioutil.ReadDir(baseDir)
 	if err != nil {
 		t.Fatalf("failed to list %s: %v", baseDir, err)
@@ -23,7 +23,7 @@ func TestRemoveLabels(t *testing.T) {
 		}
 
 		t.Run(dir.Name(), func(t *testing.T) {
-			testutils.RunGoldenTest(t, p, &RemoveLabel{})
+			testutils.RunGoldenTest(t, p, &SetAnnotations{})
 		})
 	}
 }

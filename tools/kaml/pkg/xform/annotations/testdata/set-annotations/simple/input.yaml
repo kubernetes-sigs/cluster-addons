@@ -1,0 +1,7 @@
+apiVersion: fooz/v1
+kind: Fooz
+metadata:
+  annotations:
+    existing: before
+  name: example
+  namespace: default
