@@ -94,9 +94,7 @@ spec:
       - command:
         - /bin/sh
         - -c
-        - kube-proxy --resource-container="" --oom-score-adj=-998 --v=2 --iptables-sync-period=1m
-          --iptables-min-sync-period=10s --ipvs-sync-period=1m --ipvs-min-sync-period=10s
-          --cluster-cidr=192.168.0.0/16
+        - kube-proxy --resource-container="" --oom-score-adj=-998 --v=2 --iptables-sync-period=1m --iptables-min-sync-period=10s --ipvs-sync-period=1m --ipvs-min-sync-period=10s --cluster-cidr=192.168.0.0/16
         env:
         - name: KUBERNETES_SERVICE_HOST
           value: kubernetes-master

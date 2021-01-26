@@ -1,4 +1,14 @@
 apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    addons.x-k8s.io/dashboard: dashboard-sample
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard
+
+---
+
+apiVersion: v1
 kind: ServiceAccount
 metadata:
   labels:
@@ -55,16 +65,6 @@ metadata:
     k8s-app: kubernetes-dashboard
   name: kubernetes-dashboard-settings
   namespace: kubernetes-dashboard
-
----
-
-apiVersion: v1
-kind: Namespace
-metadata:
-  labels:
-    addons.x-k8s.io/dashboard: dashboard-sample
-    k8s-app: kubernetes-dashboard
-  name: kubernetes-dashboard
 
 ---
 
