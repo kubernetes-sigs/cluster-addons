@@ -137,6 +137,6 @@ func findDNSClusterIP(ctx context.Context, c client.Client) (string, error) {
 	ip[len(ip)-1] += 9
 
 	result := ip.String()
-	klog.Infof("determined ClusterIP for kube-dns should be %q", result)
+	klog.InfoS("determined ClusterIP for kube-dns should be ", "result", result)
 	return result, nil
 }
