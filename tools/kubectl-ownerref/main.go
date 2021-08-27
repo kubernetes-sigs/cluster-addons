@@ -16,6 +16,9 @@ import (
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
+
+	// Load all auth plugins
+	_ "k8s.io/client-go/plugin/pkg/client/auth"
 )
 
 var (
