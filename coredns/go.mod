@@ -1,15 +1,14 @@
 module sigs.k8s.io/cluster-addons/coredns
 
-go 1.13
+go 1.16
 
 require (
-	github.com/coredns/corefile-migration v1.0.10
-	github.com/go-logr/logr v0.1.0
-	github.com/pkg/errors v0.8.1
-	k8s.io/api v0.18.2
-	k8s.io/apimachinery v0.18.2
-	k8s.io/client-go v0.18.2
-	k8s.io/klog v1.0.0
-	sigs.k8s.io/controller-runtime v0.6.0
-	sigs.k8s.io/kubebuilder-declarative-pattern v0.0.0-20200512162422-ce639cbf6d4c
+	github.com/coredns/corefile-migration/migration v1.0.1
+	github.com/pkg/errors v0.9.1
+	k8s.io/api v0.21.2
+	k8s.io/apimachinery v0.21.2
+	k8s.io/client-go v0.21.2
+	k8s.io/klog/v2 v2.8.0
+	sigs.k8s.io/controller-runtime v0.9.2
+	sigs.k8s.io/kubebuilder-declarative-pattern v0.0.0-20210630174303-f77bb4933dfb
 )

@@ -34,7 +34,6 @@ import (
 	"sigs.k8s.io/kubebuilder-declarative-pattern/pkg/patterns/addon/pkg/status"
 	"sigs.k8s.io/kubebuilder-declarative-pattern/pkg/patterns/declarative"
 
-	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 )
 
@@ -43,7 +42,6 @@ var _ reconcile.Reconciler = &CoreDNSReconciler{}
 // CoreDNSReconciler reconciles a CoreDNS object
 type CoreDNSReconciler struct {
 	Client      client.Client
-	Log         logr.Logger
 	Scheme      *runtime.Scheme
 	watchLabels declarative.LabelMaker
 
@@ -130,6 +128,8 @@ func (r *CoreDNSReconciler) setupReconciler(mgr ctrl.Manager) error {
 // +kubebuilder:rbac:groups=addons.x-k8s.io,resources=coredns/status,verbs=get;update;patch
 
 func (r *CoreDNSReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	addon.Init()
+
 	if err := r.setupReconciler(mgr); err != nil {
 		return err
 	}

@@ -1,13 +1,7 @@
-FROM ubuntu:latest as kubectl
-RUN apt-get update
-RUN apt-get install -y curl
-RUN curl -fsSL https://dl.k8s.io/release/v1.17.4/bin/linux/amd64/kubectl > /usr/bin/kubectl
-RUN chmod a+rx /usr/bin/kubectl
-
 # Build the manager binary
-FROM golang:1.13 as builder
+FROM golang:1.16 as builder
 
-WORKDIR /go/src/coredns
+WORKDIR /workspace
 # Copy the Go Modules manifests
 COPY go.mod go.mod
 COPY go.sum go.sum
@@ -21,19 +15,19 @@ COPY api/ api/
 COPY controllers/ controllers/
 
 # Build
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -o manager main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o manager main.go
 
-# Copy the channels so we can chmod them before we go distroless
+# Stage channels and make readable
 COPY channels/ /channels/
-RUN chmod -R a=rX /channels/
+RUN chmod -R a+rx /channels/
 
 # Use distroless as minimal base image to package the manager binary
 # Refer to https://github.com/GoogleContainerTools/distroless for more details
 FROM gcr.io/distroless/static:nonroot
 WORKDIR /
-COPY --from=builder /go/src/coredns/manager .
-COPY --from=kubectl /usr/bin/kubectl /usr/bin/kubectl
-COPY --from=builder /channels/ channels/
-USER nonroot:nonroot
+COPY --from=builder /workspace/manager .
+COPY --from=builder /channels /channels
+
+USER 65532:65532
 
 ENTRYPOINT ["/manager"]
