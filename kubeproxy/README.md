@@ -48,7 +48,11 @@ kubeproxy-operator is a Kubernetes operator for managing kubeproxy.
    ```bash
    make docker-build
 
-   make deploy
+   docker image save controller:latest > controller-latest.tar
+   kinder cp ./controller-latest.tar @cp1:/kind/
+   kinder exec @cp1 -- ctr -n k8s.io image import /kind/controller-latest.tar
+   
+   IMG=docker.io/library/controller:latest make deploy
    ```
 
 4. Install CRD
@@ -62,6 +66,6 @@ kubeproxy-operator is a Kubernetes operator for managing kubeproxy.
 
    ```bash
    kubectl get kubeproxy -n kube-system
-   kubectl get daemonset -n kube-system kubeproxy
+   kubectl get daemonset -n kube-system kube-proxy
    kubectl get nodes
    ```
