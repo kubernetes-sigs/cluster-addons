@@ -12,7 +12,14 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-func ParseYAMLtoRole(manifestStr, name, ns, saName string, supervisory bool) (string, error) {
+type BuildRoleOptions struct {
+	Name               string
+	Namespace          string
+	ServiceAccountName string
+	Supervisory        bool
+}
+
+func ParseYAMLtoRole(manifestStr string, opt BuildRoleOptions) (string, error) {
 	ctx := context.Background()
 	objs, err := manifest.ParseObjects(ctx, manifestStr)
 	if err != nil {
@@ -21,8 +28,8 @@ func ParseYAMLtoRole(manifestStr, name, ns, saName string, supervisory bool) (st
 
 	clusterRole := v1.ClusterRole{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: ns,
+			Name:      opt.Name,
+			Namespace: opt.Namespace,
 		},
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ClusterRole",
@@ -35,7 +42,7 @@ func ParseYAMLtoRole(manifestStr, name, ns, saName string, supervisory bool) (st
 	for _, obj := range objs.Items {
 		// The generated role needs the rules from any role or clusterrole
 		if obj.Kind == "Role" || obj.Kind == "ClusterRole" {
-			if supervisory {
+			if opt.Supervisory {
 				continue
 			}
 			unstruct := obj.UnstructuredObject()
@@ -65,27 +72,27 @@ func ParseYAMLtoRole(manifestStr, name, ns, saName string, supervisory bool) (st
 	buf := bytes.NewBuffer(output)
 
 	// if saName is passed in, generate YAML for rolebinding
-	if saName != "" {
+	if opt.ServiceAccountName != "" {
 		clusterRoleBinding := v1.ClusterRoleBinding{
 			TypeMeta: metav1.TypeMeta{
 				Kind:       "ClusterRoleBinding",
 				APIVersion: "rbac.authorization.k8s.io/v1",
 			},
 			ObjectMeta: metav1.ObjectMeta{
-				Namespace: ns,
-				Name:      name + "-binding",
+				Namespace: opt.Namespace,
+				Name:      opt.Name + "-binding",
 			},
 			Subjects: []v1.Subject{
 				{
 					Kind:      "ServiceAccount",
-					Name:      saName,
-					Namespace: ns,
+					Name:      opt.ServiceAccountName,
+					Namespace: opt.Namespace,
 				},
 			},
 			RoleRef: v1.RoleRef{
 				APIGroup: "rbac.authorization.k8s.io",
 				Kind:     "ClusterRole",
-				Name:     name,
+				Name:     opt.Name,
 			},
 		}
 
