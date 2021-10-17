@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"sigs.k8s.io/cluster-addons/tools/kaml/pkg/concat"
 	"sigs.k8s.io/cluster-addons/tools/kaml/pkg/xform/labels"
 )
 
@@ -36,6 +37,8 @@ func BuildRootCommand() *cobra.Command {
 	rootCmd.SilenceErrors = true
 
 	labels.AddRemoveLabelsCommand(rootCmd)
+
+	concat.AddConcatCommand(rootCmd)
 
 	return rootCmd
 }
