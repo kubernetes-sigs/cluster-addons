@@ -1,7 +1,25 @@
 domain: x-k8s.io
+layout:
+- go.kubebuilder.io/v3
+- declarative.go.kubebuilder.io/v1
+- klogr.go.kubebuilder.io/v2
+plugins:
+  declarative.go.kubebuilder.io/v1:
+    resources:
+    - domain: x-k8s.io
+      group: addons
+      kind: CoreDNS
+      version: v1alpha1
+projectName: coredns
 repo: sigs.k8s.io/cluster-addons/coredns
 resources:
-- group: addons
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: x-k8s.io
+  group: addons
   kind: CoreDNS
+  path: sigs.k8s.io/cluster-addons/coredns/api/v1alpha1
   version: v1alpha1
-version: "2"
+version: "3"

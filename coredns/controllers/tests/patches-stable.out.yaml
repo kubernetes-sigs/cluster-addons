@@ -98,7 +98,7 @@ metadata:
     k8s-app: kube-dns
     kubernetes.io/cluster-service: "true"
     kubernetes.io/name: CoreDNS
-  name: coredns-52c752mgc9
+  name: coredns-f28h45tm2d
   namespace: kube-system
 
 ---
@@ -199,7 +199,7 @@ spec:
           items:
           - key: Corefile
             path: Corefile
-          name: coredns-52c752mgc9
+          name: coredns-f28h45tm2d
         name: config-volume
 
 ---
