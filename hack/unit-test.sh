@@ -43,3 +43,8 @@ make test -C bootstrap
 
 echo "****** Testing Node-Local-DNS Operator ******"
 make test -C nodelocaldns
+
+echo "****** Testing tools/rbac-gen ******"
+pushd tools/rbac-gen
+go test ./...
+popd
