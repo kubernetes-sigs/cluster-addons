@@ -47,7 +47,11 @@ func TestRBACGen(t *testing.T) {
 			continue
 		}
 
-		actualYAML, err := ParseYAMLtoRole(string(b), "generated-role", "kube-system", "", false)
+		opt := BuildRoleOptions{
+			Name:      "generated-role",
+			Namespace: "kube-system",
+		}
+		actualYAML, err := ParseYAMLtoRole(string(b), opt)
 		if err != nil {
 			t.Errorf("error parsing YAML %s: %v", p, err)
 			continue
