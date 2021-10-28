@@ -34,12 +34,13 @@ rules:
   verbs:
   - list
   - watch
-- apiGroups:
-  - ""
-  resources:
-  - nodes
-  verbs:
-  - get
+  - apiGroups:
+    - discovery.k8s.io
+    resources:
+    - endpointslices
+    verbs:
+    - list
+    - watch
 
 ---
 
@@ -127,19 +128,21 @@ spec:
     spec:
       affinity:
         podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchExpressions:
-              - key: k8s-app
-                operator: In
-                values:
-                - kube-dns
-            topologyKey: kubernetes.io/hostname
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: k8s-app
+                  operator: In
+                  values:
+                  - kube-dns
+              topologyKey: kubernetes.io/hostname
+            weight: 100
       containers:
       - args:
         - -conf
         - /etc/coredns/Corefile
-        image: k8s.gcr.io/coredns:1.7.0
+        image: k8s.gcr.io/coredns/coredns:1.8.4
         imagePullPolicy: IfNotPresent
         livenessProbe:
           failureThreshold: 5
