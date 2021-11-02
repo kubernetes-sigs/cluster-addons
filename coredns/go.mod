@@ -3,7 +3,7 @@ module sigs.k8s.io/cluster-addons/coredns
 go 1.16
 
 require (
-	github.com/coredns/corefile-migration/migration v1.0.1
+	github.com/coredns/corefile-migration v1.0.14
 	github.com/pkg/errors v0.9.1
 	k8s.io/api v0.21.2
 	k8s.io/apimachinery v0.21.2

@@ -1,14 +1,17 @@
 .:53 {
     errors
-    health
+    health {
+       lameduck 5s
+    }
+    ready
     kubernetes {{ .DNSDomain }} in-addr.arpa ip6.arpa {
-       upstream
-       pods insecure
        fallthrough in-addr.arpa ip6.arpa
        ttl 30
     }
     prometheus :9153
-    forward . /etc/resolv.conf
+    forward . /etc/resolv.conf {
+       max_concurrent 1000
+    }
     cache 30
     loop
     reload
