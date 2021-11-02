@@ -37,7 +37,7 @@ func TestRBACGen(t *testing.T) {
 		}
 
 		if !strings.HasSuffix(p, ".in.yaml") {
-			if !strings.HasSuffix(p, ".out.yaml") {
+			if !strings.HasSuffix(p, ".out.yaml") && !strings.HasSuffix(p, ".out.kubebuilder") {
 				t.Errorf("unexpected file in tests directory: %s", p)
 			}
 			continue
@@ -64,10 +64,16 @@ func TestRBACGen(t *testing.T) {
 			if err != nil {
 				t.Fatalf("error converting to YAML %s: %v", p, err)
 			}
+			expectedYAMLPath := strings.Replace(p, "in.yaml", "out.yaml", -1)
+			CheckGoldenFile(t, expectedYAMLPath, string(actualYAML))
 
-			expectedPath := strings.Replace(p, "in.yaml", "out.yaml", -1)
-
-			CheckGoldenFile(t, expectedPath, string(actualYAML))
+			kubebuilderConverter := KubebuilderConverter{}
+			if err := kubebuilderConverter.VisitObjects(actualObjects); err != nil {
+				t.Fatalf("error building kubebuilder rules: %v", err)
+			}
+			actualKubebuilder := strings.Join(kubebuilderConverter.Rules, "\n")
+			expectedKubebuilderPath := strings.Replace(p, "in.yaml", "out.kubebuilder", -1)
+			CheckGoldenFile(t, expectedKubebuilderPath, string(actualKubebuilder))
 		})
 	}
 }
@@ -75,11 +81,17 @@ func TestRBACGen(t *testing.T) {
 func CheckGoldenFile(t *testing.T, expectedPath, actual string) {
 	t.Helper()
 
+	writeOutput := os.Getenv("HACK_AUTOFIX_EXPECTED_OUTPUT") != ""
+
 	var expected string
 	{
 		b, err := ioutil.ReadFile(expectedPath)
 		if err != nil {
-			t.Fatalf("error reading file %s: %v", expectedPath, err)
+			if writeOutput && os.IsNotExist(err) {
+				// ignore, so we can create output
+			} else {
+				t.Fatalf("error reading file %s: %v", expectedPath, err)
+			}
 		}
 		expected = string(b)
 	}
@@ -97,7 +109,7 @@ func CheckGoldenFile(t *testing.T, expectedPath, actual string) {
 	t.Errorf("Diff: expected - + actual\n%s", delta)
 	t.Errorf("unexpected diff between actual and expected YAML. See previous output for details.")
 
-	if os.Getenv("HACK_AUTOFIX_EXPECTED_OUTPUT") != "" {
+	if writeOutput {
 		if err := os.WriteFile(expectedPath, []byte(actual), 0644); err != nil {
 			t.Errorf("failed to write expected file %q: %w", expectedPath, err)
 		}
