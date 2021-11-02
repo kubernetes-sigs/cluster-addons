@@ -3,7 +3,6 @@ kind: ClusterRole
 metadata:
   creationTimestamp: null
   name: generated-role
-  namespace: kube-system
 rules:
 - apiGroups:
   - ""
@@ -11,6 +10,6 @@ rules:
   - configmaps
   verbs:
   - create
-  - update
   - delete
   - get
+  - update
