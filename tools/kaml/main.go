@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"sigs.k8s.io/cluster-addons/tools/kaml/pkg/prefix"
 	"sigs.k8s.io/cluster-addons/tools/kaml/pkg/xform/labels"
 )
 
@@ -36,6 +37,8 @@ func BuildRootCommand() *cobra.Command {
 	rootCmd.SilenceErrors = true
 
 	labels.AddRemoveLabelsCommand(rootCmd)
+
+	prefix.AddNamePrefixCommand(rootCmd)
 
 	return rootCmd
 }
