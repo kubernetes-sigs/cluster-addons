@@ -4,7 +4,7 @@ Cluster Addons is a sub-project of [SIG-Cluster-Lifecycle](https://github.com/ku
 
 This sub-project wants to figure out the best way to install, manage and deliver cluster addons.
 
-In this repository we explore ideas for all of the above. [Cluster addon operators](https://github.com/kubernetes/enhancements/blob/master/keps/sig-cluster-lifecycle/addons/0035-20190128-addons-via-operators.md) in particular.
+In this repository we explore ideas for all of the above. [Cluster addon operators](https://github.com/kubernetes/enhancements/tree/master/keps/sig-cluster-lifecycle/addons/2492-Addons-via-Operators) in particular.
 
 With cluster addon operators, we are exploring a kubernetes-native way of managing addons using CRDs(Custom Resource Definitions) and controllers where the controllers encode how best to manage the addon. Installing and managing an addon could be as simple as creating a custom resource.
 
@@ -36,7 +36,7 @@ We
 
 - created an actual [addon operator we deemed as straight-forward](https://github.com/kubernetes-sigs/cluster-addons/tree/master/coredns), so we have actual code to look
 - wrote an [installer library](https://github.com/kubernetes-sigs/cluster-addons/tree/master/installer) to install addons into the cluster
-- added support for [addon operators to kubebuilder](https://github.com/kubernetes-sigs/kubebuilder/tree/master/plugins)
+- added support for [addon operators to kubebuilder](https://github.com/kubernetes-sigs/kubebuilder/tree/master/pkg/plugins)
 - started work on integrating the addon installer into kubeadm and kops
 - had a look getting agreement on manifest bundles
 - started quite a few other experiments
