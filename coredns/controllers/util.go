@@ -182,7 +182,7 @@ func corefileMigration(ctx context.Context, c client.Client, coreDNSVersion, cor
 		}
 	}
 	coreDNSImageParts := strings.Split(coreDNSImage, ":")
-	currentCoreDNSVersion := coreDNSImageParts[len(coreDNSImageParts)-1]
+	currentCoreDNSVersion := strings.TrimLeft(coreDNSImageParts[len(coreDNSImageParts)-1], "v")
 
 	if currentCoreDNSVersion != coreDNSVersion {
 		// Check if Corefile Migration is necessary and get the migrated Corefile
