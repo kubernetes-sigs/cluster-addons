@@ -1,0 +1,2 @@
+//+kubebuilder:rbac:groups=,resources=configmaps,verbs=create;delete;get;update
+//+kubebuilder:rbac:groups=apps,resources=deployments,verbs=create;delete;get;update

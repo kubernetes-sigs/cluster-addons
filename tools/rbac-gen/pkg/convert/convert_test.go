@@ -1,13 +1,15 @@
 package convert
 
 import (
+	"bytes"
+	"context"
+	"fmt"
 	"io/ioutil"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
-
-	"golang.org/x/xerrors"
 
 	"k8s.io/apimachinery/pkg/util/diff"
 )
@@ -35,108 +37,119 @@ func TestRBACGen(t *testing.T) {
 		}
 
 		if !strings.HasSuffix(p, ".in.yaml") {
-			if !strings.HasSuffix(p, ".out.yaml") {
+			if !strings.HasSuffix(p, ".out.yaml") && !strings.HasSuffix(p, ".out.kubebuilder") {
 				t.Errorf("unexpected file in tests directory: %s", p)
 			}
 			continue
 		}
 
-		b, err := ioutil.ReadFile(p)
-		if err != nil {
-			t.Errorf("error reading file %s: %v", p, err)
-			continue
-		}
+		t.Run(f.Name(), func(t *testing.T) {
+			ctx := context.Background()
 
-		opt := BuildRoleOptions{
-			Name:      "generated-role",
-			Namespace: "kube-system",
-		}
-		actualYAML, err := ParseYAMLtoRole(string(b), opt)
-		if err != nil {
-			t.Errorf("error parsing YAML %s: %v", p, err)
-			continue
-		}
-
-		expectedPath := strings.Replace(p, "in.yaml", "out.yaml", -1)
-		var expectedYAML string
-
-		{
-			b, err := ioutil.ReadFile(expectedPath)
+			b, err := ioutil.ReadFile(p)
 			if err != nil {
-				t.Errorf("error reading file %s: %v", expectedPath, err)
-				continue
-			}
-			expectedYAML = string(b)
-		}
-
-		if expectedYAML != actualYAML {
-			if err := diffFiles(t, expectedPath, actualYAML); err != nil {
-				t.Logf("failed to run system diff, falling back to string diff: %v", err)
-				t.Logf("diff: %s", diff.StringDiff(actualYAML, expectedYAML))
+				t.Fatalf("error reading file %s: %v", p, err)
 			}
 
-			t.Errorf("unexpected diff between actual and expected YAML. See previous output for details.")
-			// TODO: Do we want to replace the out.yaml if HACK_AUTOFIX_EXPECTED_OUTPUT="true" is set?
-			// t.Logf(`To regenerate the output based on this result,
-			// rerun this test with HACK_AUTOFIX_EXPECTED_OUTPUT="true"`)
-		}
+			opt := BuildRoleOptions{
+				Name:      "generated-role",
+				Namespace: "kube-system",
+			}
+			actualObjects, err := BuildRole(ctx, string(b), opt)
+			if err != nil {
+				t.Fatalf("error building role %s: %v", p, err)
+			}
+
+			actualYAML, err := ToYAML(actualObjects)
+			if err != nil {
+				t.Fatalf("error converting to YAML %s: %v", p, err)
+			}
+			expectedYAMLPath := strings.Replace(p, "in.yaml", "out.yaml", -1)
+			CheckGoldenFile(t, expectedYAMLPath, string(actualYAML))
+
+			kubebuilderConverter := KubebuilderConverter{}
+			if err := kubebuilderConverter.VisitObjects(actualObjects); err != nil {
+				t.Fatalf("error building kubebuilder rules: %v", err)
+			}
+			actualKubebuilder := strings.Join(kubebuilderConverter.Rules, "\n")
+			expectedKubebuilderPath := strings.Replace(p, "in.yaml", "out.kubebuilder", -1)
+			CheckGoldenFile(t, expectedKubebuilderPath, string(actualKubebuilder))
+		})
 	}
 }
 
-// Had to copy out this func from kubebuider-declarative-pattern. Could we simply export it?
-func diffFiles(t *testing.T, expectedPath, actual string) error {
+func CheckGoldenFile(t *testing.T, expectedPath, actual string) {
 	t.Helper()
-	writeTmp := func(content string) (string, error) {
-		tmp, err := ioutil.TempFile("", "*.yaml")
+
+	writeOutput := os.Getenv("HACK_AUTOFIX_EXPECTED_OUTPUT") != ""
+
+	var expected string
+	{
+		b, err := ioutil.ReadFile(expectedPath)
 		if err != nil {
-			return "", err
+			if writeOutput && os.IsNotExist(err) {
+				// ignore, so we can create output
+			} else {
+				t.Fatalf("error reading file %s: %v", expectedPath, err)
+			}
 		}
-		defer func() {
-			tmp.Close()
-		}()
-		if _, err := tmp.Write([]byte(content)); err != nil {
-			return "", err
-		}
-		return tmp.Name(), nil
+		expected = string(b)
 	}
 
-	actualTmp, err := writeTmp(actual)
+	delta, err := runDiffCommand(actual, expected)
 	if err != nil {
-		return xerrors.Errorf("write actual yaml to temp file failed: %w", err)
+		t.Logf("failed to run system diff, falling back to string diff: %v", err)
+		delta = diff.StringDiff(actual, expected)
 	}
-	t.Logf("Wrote actual to %s", actualTmp)
+
+	if delta == "" {
+		return
+	}
+
+	t.Errorf("Diff: expected - + actual\n%s", delta)
+	t.Errorf("unexpected diff between actual and expected YAML. See previous output for details.")
+
+	if writeOutput {
+		if err := os.WriteFile(expectedPath, []byte(actual), 0644); err != nil {
+			t.Errorf("failed to write expected file %q: %w", expectedPath, err)
+		}
+	} else {
+		t.Logf(`To regenerate the output based on this result, rerun this test with HACK_AUTOFIX_EXPECTED_OUTPUT=1`)
+	}
+}
+
+func runDiffCommand(actual, expected string) (string, error) {
+	tempDir, err := os.MkdirTemp("", "")
+	if err != nil {
+		return "", fmt.Errorf("failed to create temp dir: %w", err)
+	}
+
+	defer os.RemoveAll(tempDir)
+
+	actualPath := filepath.Join(tempDir, "actual.yaml")
+	if err := ioutil.WriteFile(actualPath, []byte(actual), 0644); err != nil {
+		return "", fmt.Errorf("failed to write file %q: %w", actualPath, err)
+	}
+
+	expectedPath := filepath.Join(tempDir, "expected.yaml")
+	if err := ioutil.WriteFile(expectedPath, []byte(expected), 0644); err != nil {
+		return "", fmt.Errorf("failed to write file %q: %w", expectedPath, err)
+	}
 
 	// pls to use unified diffs, kthxbai?
-	cmd := exec.Command("diff", "-u", expectedPath, actualTmp)
-	stdout, err := cmd.StdoutPipe()
-	if err != nil {
-		return xerrors.Errorf("set up stdout pipe from diff failed: %w", err)
-	}
+	cmd := exec.Command("diff", "-u", expectedPath, actualPath)
+	var stdout bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = os.Stderr
 
-	if err := cmd.Start(); err != nil {
-		return xerrors.Errorf("start command failed: %w", err)
-	}
-
-	diff, err := ioutil.ReadAll(stdout)
-	if err != nil {
-		return xerrors.Errorf("read from diff stdout failed: %w", err)
-	}
-
-	if err := cmd.Wait(); err != nil {
-		exitErr, ok := err.(*exec.ExitError)
-		if !ok {
-			return xerrors.Errorf("wait for command to finish failed: %w", err)
+	if err := cmd.Run(); err != nil {
+		// exit code 1 means there was a diff
+		if cmd.ProcessState.ExitCode() == 1 {
+			return stdout.String(), nil
 		}
-		t.Logf("Diff exited %s", exitErr)
+
+		return "", fmt.Errorf("failed to run diff: %w", err)
 	}
 
-	expectedAbs, err := filepath.Abs(expectedPath)
-	if err != nil {
-		t.Logf("getting absolute path for %s failed: %s", expectedPath, err)
-		expectedAbs = expectedPath
-	}
-
-	t.Logf("View diff: meld %s %s", expectedAbs, actualTmp)
-	t.Logf("Diff: expected - + actual\n%s", diff)
-	return nil
+	return stdout.String(), nil
 }

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"k8s.io/klog/v2"
@@ -43,6 +44,7 @@ func BuildGenerateCommand(ctx context.Context) *cobra.Command {
 	var opt convert.BuildRoleOptions
 	opt.Name = "generated-role"
 	opt.Namespace = "kube-system"
+	opt.Format = "yaml"
 
 	cmd := &cobra.Command{
 		Use: "generate",
@@ -57,28 +59,66 @@ func BuildGenerateCommand(ctx context.Context) *cobra.Command {
 	cmd.Flags().StringVar(&opt.Namespace, "ns", opt.Namespace, "namespace of the role to be generated")
 	cmd.Flags().StringVar(&out, "out", out, "name of output file")
 	cmd.Flags().BoolVar(&opt.Supervisory, "supervisory", opt.Supervisory, "outputs role for operator in supervisory mode")
+	cmd.Flags().StringVar(&opt.CRD, "crd", opt.CRD, "CRD to generate")
+	cmd.Flags().BoolVar(&opt.LimitResourceNames, "limit-resource-names", opt.LimitResourceNames, "Limit to resource names in the manifest")
+	cmd.Flags().BoolVar(&opt.LimitNamespaces, "limit-namespaces", opt.LimitNamespaces, "Limit to namespaces in the manifest")
+
+	cmd.Flags().StringVar(&opt.Format, "format", opt.Format, "Format to write in (yaml, kubebuilder)")
 
 	return cmd
 }
 
 func RunGenerate(ctx context.Context, yamlFile string, out string, opt convert.BuildRoleOptions) error {
-	//	read yaml file passed in from cmd
-	bytes, err := ioutil.ReadFile(yamlFile)
-	if err != nil {
-		return err
-	}
-
-	// generate Group and Kind
-
-	output, err := convert.ParseYAMLtoRole(string(bytes), opt)
-	if err != nil {
-		return err
-	}
-
-	if out == "" {
-		fmt.Fprintf(os.Stdout, output)
+	//	read yaml from file or stdin
+	in := ""
+	if yamlFile == "-" {
+		b, err := ioutil.ReadAll(os.Stdin)
+		if err != nil {
+			return err
+		}
+		in = string(b)
 	} else {
-		err = ioutil.WriteFile(out, []byte(output), 0644)
+		b, err := ioutil.ReadFile(yamlFile)
+		if err != nil {
+			return err
+		}
+		in = string(b)
+	}
+
+	// build roles for objects in yaml
+	objects, err := convert.BuildRole(ctx, in, opt)
+	if err != nil {
+		return err
+	}
+
+	var output []byte
+	switch opt.Format {
+	case "yaml":
+		y, err := convert.ToYAML(objects)
+		if err != nil {
+			return err
+		}
+		output = y
+
+	case "kubebuilder":
+		// convert to kubebuilder format and output
+		var conv convert.KubebuilderConverter
+		if err := conv.VisitObjects(objects); err != nil {
+			return err
+		}
+		output = []byte(strings.Join(conv.Rules, "\n"))
+	default:
+		return fmt.Errorf("unknown format %q", opt.Format)
+	}
+
+	// write to output file or setdout
+	if out == "" {
+		_, err = os.Stdout.Write(output)
+		if err == nil {
+			_, err = os.Stdout.WriteString("\n")
+		}
+	} else {
+		err = ioutil.WriteFile(out, output, 0644)
 	}
 
 	return err
