@@ -110,7 +110,7 @@ func BuildRole(ctx context.Context, manifestStr string, opt BuildRoleOptions) ([
 			rules.Add(v1.PolicyRule{
 				APIGroups: []string{obj.Group},
 				Resources: []string{resource},
-				Verbs:     []string{"create", "update", "delete", "get", "list", "watch"},
+				Verbs:     []string{"create", "update", "delete", "patch", "get", "list", "watch"},
 			})
 
 			rules.Add(v1.PolicyRule{
