@@ -102,12 +102,12 @@ func BuildRole(ctx context.Context, manifestStr string, opt BuildRoleOptions) ([
 			})
 
 		} else if !kindMap[obj.Group+"::"+obj.Kind] {
-			newRule := v1.PolicyRule{
+			rules.Add(v1.PolicyRule{
 				APIGroups: []string{obj.Group},
 				Resources: []string{resource},
-				Verbs:     []string{"create", "update", "delete", "get"},
-			}
-			rules.Add(newRule)
+				Verbs:     []string{"create", "update", "delete", "get", "list", "watch"},
+			})
+
 			kindMap[obj.Group+"::"+obj.Kind] = true
 		}
 	}
