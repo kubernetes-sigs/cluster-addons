@@ -32,14 +32,13 @@ We have created a tutorial on how to create your own addon operator [here](https
 
 > What's your current agenda and timeline?
 
-We
+We:
 
-- created an actual [addon operator we deemed as straight-forward](https://github.com/kubernetes-sigs/cluster-addons/tree/master/coredns), so we have actual code to look
+- created an [addon operator we deemed as straight-forward](https://github.com/kubernetes-sigs/cluster-addons/tree/master/coredns), so we have actual code to look at.
 - wrote an [installer library](https://github.com/kubernetes-sigs/cluster-addons/tree/master/installer) to install addons into the cluster
 - added support for [addon operators to kubebuilder](https://github.com/kubernetes-sigs/kubebuilder/tree/master/pkg/plugins/golang/declarative/v1)
-- started work on integrating the addon installer into kubeadm and kops
-- had a look getting agreement on manifest bundles
-- started quite a few other experiments
+- started work on integrating the addon installer into kubeadm and kOps
+- are building consensus around a pattern of a "base" manifest with an overlay of parameter-driven changes (usually through code)
 
 > Who does this?
 
