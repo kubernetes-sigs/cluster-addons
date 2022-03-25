@@ -1,2 +1,3 @@
 //+kubebuilder:rbac:groups=,resources=pods;secrets,verbs=get;list;watch
-//+kubebuilder:rbac:groups=rbac.authorization.k8s.io,resources=clusterroles;roles,verbs=create;delete;get;update
+//+kubebuilder:rbac:groups=rbac.authorization.k8s.io,resources=clusterroles/status;roles/status,verbs=get;list;watch
+//+kubebuilder:rbac:groups=rbac.authorization.k8s.io,resources=clusterroles;roles,verbs=create;delete;get;list;patch;update;watch

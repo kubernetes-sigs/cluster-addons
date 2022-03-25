@@ -22,4 +22,16 @@ rules:
   - create
   - delete
   - get
+  - list
+  - patch
   - update
+  - watch
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - clusterroles/status
+  - roles/status
+  verbs:
+  - get
+  - list
+  - watch
