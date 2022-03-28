@@ -111,7 +111,7 @@ func CheckGoldenFile(t *testing.T, expectedPath, actual string) {
 
 	if writeOutput {
 		if err := os.WriteFile(expectedPath, []byte(actual), 0644); err != nil {
-			t.Errorf("failed to write expected file %q: %w", expectedPath, err)
+			t.Errorf("failed to write expected file %q: %v", expectedPath, err)
 		}
 	} else {
 		t.Logf(`To regenerate the output based on this result, rerun this test with HACK_AUTOFIX_EXPECTED_OUTPUT=1`)
