@@ -1,0 +1,1 @@
+//+kubebuilder:rbac:groups=,resources=configmaps,verbs=create;delete;get;update
