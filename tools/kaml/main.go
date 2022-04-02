@@ -7,6 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"sigs.k8s.io/cluster-addons/tools/kaml/pkg/concat"
+	"sigs.k8s.io/cluster-addons/tools/kaml/pkg/prefix"
 	"sigs.k8s.io/cluster-addons/tools/kaml/pkg/xform/labels"
 )
 
@@ -38,6 +39,7 @@ func BuildRootCommand() *cobra.Command {
 
 	labels.AddRemoveLabelsCommand(rootCmd)
 
+	prefix.AddNamePrefixCommand(rootCmd)
 	concat.AddConcatCommand(rootCmd)
 
 	return rootCmd
