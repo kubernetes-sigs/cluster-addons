@@ -35,11 +35,12 @@ rules:
   - list
   - watch
 - apiGroups:
-  - ""
+  - discovery.k8s.io
   resources:
-  - nodes
+  - endpointslices
   verbs:
-  - get
+  - list
+  - watch
 
 ---
 
@@ -96,7 +97,7 @@ metadata:
     k8s-app: kube-dns
     kubernetes.io/cluster-service: "true"
     kubernetes.io/name: CoreDNS
-  name: coredns-m27d7c75md
+  name: coredns-2tf9tbmth7
   namespace: kube-system
 
 ---
@@ -127,19 +128,21 @@ spec:
     spec:
       affinity:
         podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchExpressions:
-              - key: k8s-app
-                operator: In
-                values:
-                - kube-dns
-            topologyKey: kubernetes.io/hostname
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: k8s-app
+                  operator: In
+                  values:
+                  - kube-dns
+              topologyKey: kubernetes.io/hostname
+            weight: 100
       containers:
       - args:
         - -conf
         - /etc/coredns/Corefile
-        image: k8s.gcr.io/coredns:1.7.0
+        image: k8s.gcr.io/coredns/coredns:v1.8.4
         imagePullPolicy: IfNotPresent
         livenessProbe:
           failureThreshold: 5
@@ -197,7 +200,7 @@ spec:
           items:
           - key: Corefile
             path: Corefile
-          name: coredns-m27d7c75md
+          name: coredns-2tf9tbmth7
         name: config-volume
 
 ---

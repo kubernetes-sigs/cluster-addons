@@ -28,7 +28,7 @@ metadata:
   name: coredns-operator
   namespace: kube-system
 spec:
-  version: 1.3.1
+  version: 1.8.4
   dnsDomain: cluster.local
   dnsIP: 10.96.0.10
   corefile: |
@@ -36,7 +36,6 @@ spec:
         errors
         health
         kubernetes cluster.local in-addr.arpa ip6.arpa {
-           pods insecure
            fallthrough in-addr.arpa ip6.arpa
         }
         prometheus :9153

@@ -26,7 +26,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/klog"
+	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/coredns/corefile-migration/migration"
@@ -182,7 +182,7 @@ func corefileMigration(ctx context.Context, c client.Client, coreDNSVersion, cor
 		}
 	}
 	coreDNSImageParts := strings.Split(coreDNSImage, ":")
-	currentCoreDNSVersion := coreDNSImageParts[len(coreDNSImageParts)-1]
+	currentCoreDNSVersion := strings.TrimLeft(coreDNSImageParts[len(coreDNSImageParts)-1], "v")
 
 	if currentCoreDNSVersion != coreDNSVersion {
 		// Check if Corefile Migration is necessary and get the migrated Corefile

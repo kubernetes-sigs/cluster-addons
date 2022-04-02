@@ -1,5 +1,5 @@
 /*
-Copyright 2020 The Kubernetes Authors.
+Copyright 2021 The Kubernetes Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -36,10 +36,10 @@ type CoreDNSStatus struct {
 	addonv1alpha1.CommonStatus `json:",inline"`
 }
 
-// +kubebuilder:object:root=true
+//+kubebuilder:object:root=true
+//+kubebuilder:subresource:status
 
 // CoreDNS is the Schema for the coredns API
-// +kubebuilder:subresource:status
 type CoreDNS struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -70,7 +70,7 @@ func (o *CoreDNS) SetCommonStatus(s addonv1alpha1.CommonStatus) {
 	o.Status.CommonStatus = s
 }
 
-// +kubebuilder:object:root=true
+//+kubebuilder:object:root=true
 
 // CoreDNSList contains a list of CoreDNS
 type CoreDNSList struct {

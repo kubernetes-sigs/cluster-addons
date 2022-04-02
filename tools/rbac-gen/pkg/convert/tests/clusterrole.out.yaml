@@ -3,39 +3,23 @@ kind: ClusterRole
 metadata:
   creationTimestamp: null
   name: generated-role
-  namespace: kube-system
 rules:
 - apiGroups:
   - ""
   resources:
   - pods
-  verbs:
-  - get
-  - watch
-  - list
-- apiGroups:
-  - rbac.authorization.k8s.io
-  resources:
-  - roles
-  verbs:
-  - create
-  - update
-  - delete
-  - get
-- apiGroups:
-  - ""
-  resources:
   - secrets
   verbs:
   - get
-  - watch
   - list
+  - watch
 - apiGroups:
   - rbac.authorization.k8s.io
   resources:
   - clusterroles
+  - roles
   verbs:
   - create
-  - update
   - delete
   - get
+  - update
