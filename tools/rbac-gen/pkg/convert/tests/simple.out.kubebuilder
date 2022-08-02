@@ -1,1 +1,2 @@
-//+kubebuilder:rbac:groups=,resources=configmaps,verbs=create;delete;get;update
+//+kubebuilder:rbac:groups=,resources=configmaps,verbs=create;delete;get;list;patch;update;watch
+//+kubebuilder:rbac:groups=,resources=configmaps/status,verbs=get;list;watch

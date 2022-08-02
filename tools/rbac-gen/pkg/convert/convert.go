@@ -101,13 +101,24 @@ func BuildRole(ctx context.Context, manifestStr string, opt BuildRoleOptions) ([
 				Verbs:     []string{"get", "list", "watch"},
 			})
 
+			rules.Add(v1.PolicyRule{
+				APIGroups: []string{obj.Group},
+				Resources: []string{resource + "/status"},
+				Verbs:     []string{"get", "list", "watch"},
+			})
 		} else if !kindMap[obj.Group+"::"+obj.Kind] {
-			newRule := v1.PolicyRule{
+			rules.Add(v1.PolicyRule{
 				APIGroups: []string{obj.Group},
 				Resources: []string{resource},
-				Verbs:     []string{"create", "update", "delete", "get"},
-			}
-			rules.Add(newRule)
+				Verbs:     []string{"create", "update", "delete", "patch", "get", "list", "watch"},
+			})
+
+			rules.Add(v1.PolicyRule{
+				APIGroups: []string{obj.Group},
+				Resources: []string{resource + "/status"},
+				Verbs:     []string{"get", "list", "watch"},
+			})
+
 			kindMap[obj.Group+"::"+obj.Kind] = true
 		}
 	}

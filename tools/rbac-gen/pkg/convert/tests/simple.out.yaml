@@ -12,4 +12,15 @@ rules:
   - create
   - delete
   - get
+  - list
+  - patch
   - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - configmaps/status
+  verbs:
+  - get
+  - list
+  - watch

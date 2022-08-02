@@ -12,7 +12,18 @@ rules:
   - create
   - delete
   - get
+  - list
+  - patch
   - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - configmaps/status
+  verbs:
+  - get
+  - list
+  - watch
 - apiGroups:
   - apps
   resources:
@@ -21,4 +32,15 @@ rules:
   - create
   - delete
   - get
+  - list
+  - patch
   - update
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - deployments/status
+  verbs:
+  - get
+  - list
+  - watch
