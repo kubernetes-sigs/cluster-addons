@@ -169,7 +169,7 @@ spec:
         - mountPath: /etc/kube-flannel/
           name: flannel-cfg
       nodeSelector:
-        beta.kubernetes.io/arch: amd64
+        kubernetes.io/arch: amd64
       serviceAccountName: flannel
       tolerations:
       - effect: NoSchedule
