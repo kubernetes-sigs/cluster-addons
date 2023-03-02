@@ -102,7 +102,7 @@ spec:
           value: kubernetes-master
         - name: KUBERNETES_SERVICE_PORT
           value: "443"
-        image: k8s.gcr.io/kube-proxy:v1.15.0
+        image: registry.k8s.io/kube-proxy:v1.15.0
         name: kube-proxy
         resources:
           requests:
