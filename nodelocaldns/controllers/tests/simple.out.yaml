@@ -145,7 +145,7 @@ spec:
         - /etc/Corefile
         - -upstreamsvc
         - kube-dns-upstream
-        image: k8s.gcr.io/k8s-dns-node-cache:1.15.13
+        image: registry.k8s.io/k8s-dns-node-cache:1.15.13
         livenessProbe:
           httpGet:
             host: 169.254.20.10

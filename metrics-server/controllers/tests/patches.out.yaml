@@ -131,7 +131,7 @@ spec:
       - args:
         - --kubelet-insecure-tls
         - --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname
-        image: k8s.gcr.io/metrics-server-amd64:v0.3.6
+        image: registry.k8s.io/metrics-server-amd64:v0.3.6
         imagePullPolicy: Always
         name: metrics-server
         volumeMounts:

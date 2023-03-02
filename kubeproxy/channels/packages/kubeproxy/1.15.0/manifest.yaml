@@ -53,7 +53,7 @@ spec:
         effect: "NoSchedule"
       containers:
       - name: kube-proxy
-        image: k8s.gcr.io/kube-proxy:v1.15.0
+        image: registry.k8s.io/kube-proxy:v1.15.0
         resources:
           requests:
             cpu: 50m
