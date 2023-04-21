@@ -1,7 +1,6 @@
 # See the OWNERS docs at https://go.k8s.io/owners
 
 approvers:
-  - dholbach
   - johnsonj
   - justinsb
   - rajansandeep
@@ -9,7 +8,6 @@ approvers:
   - sig-cluster-lifecycle-leads
 reviewers:
   - atoato88
-  - dholbach
   - johnsonj
   - justinsb
   - rajansandeep
