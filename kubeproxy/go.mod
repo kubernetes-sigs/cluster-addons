@@ -1,6 +1,6 @@
 module addon-operators/kubeproxy
 
-go 1.13
+go 1.16
 
 require (
 	github.com/go-logr/logr v0.1.0
